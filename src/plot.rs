@@ -37,7 +37,7 @@ pub fn generate_plot(
             .margin_bottom(10)
             .x_label_area_size(40_i32)
             .y_label_area_size(80_i32)
-            .build_cartesian_2d(0.0..100.0, 0.0..0.1)?;
+            .build_cartesian_2d(0.0..100.0, 0.0..0.07)?;
 
         let mut mesh = chart.configure_mesh();
         let mesh = mesh.y_desc(&station_stairs[i].0).light_line_style(&WHITE);
