@@ -141,7 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let lighter_stroke = ShapeStyle {
-        color: BLUE.mix(1.0),
+        color: GREEN.mix(1.0),
         filled: true,
         stroke_width: 1,
     };
@@ -200,7 +200,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mapped = drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
             let p: PathElement<(i32, i32)> = PathElement::new(
                 [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-                black_stroke,
+                lighter_stroke,
             );
             root.draw(&p)?;
         }
