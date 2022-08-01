@@ -81,6 +81,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ("1".to_string(), vec![50]),
         ("2".to_string(), vec![10]),
     ];
+    let n_stations = station_stairs.len();
 
     let od_pairs = [
         (("0".to_string(), "1"), 10),
@@ -146,23 +147,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         stroke_width: 1,
     };
 
-    let roots = root.split_evenly((3, 1));
+    let roots = root.split_evenly((n_stations, 1));
     for (i, root) in roots.iter().enumerate() {
         let mut chart = ChartBuilder::on(&root)
             .margin(20)
             .x_label_area_size(40_i32)
             .y_label_area_size(80_i32)
-            .build_cartesian_2d(
-                0.0..100.0,
-                0.0..0.1,
-            )?;
+            .build_cartesian_2d(0.0..100.0, 0.0..0.1)?;
 
-        chart
-            .configure_mesh()
-            .x_desc("xpos")
-            .y_desc("frequency")
-            .light_line_style(&WHITE)
-            .draw()?;
+        if i == n_stations - 1 {
+            chart
+                .configure_mesh()
+                .x_desc("xpos")
+                .y_desc("frequency")
+                .light_line_style(&WHITE)
+                .draw()?;
+        } else {
+            chart
+                .configure_mesh()
+                .y_desc("frequency")
+                .light_line_style(&WHITE)
+                .draw()?;
+        }
 
         let res: Vec<_> = (0..=100)
             .map(|num| {
@@ -198,7 +204,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let (_, stair_locations) = &station_stairs[i];
         for stair_location in stair_locations {
-            let mapped = drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
+            let mapped =
+                drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
             let p: PathElement<(i32, i32)> = PathElement::new(
                 [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
                 lighter_stroke,
@@ -208,6 +215,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     root.present()?;
-    println!("Result has been saved to {}", OUT_FILE_NAME);
     Ok(())
 }
