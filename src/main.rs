@@ -158,19 +158,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .y_label_area_size(80_i32)
             .build_cartesian_2d(0.0..100.0, 0.0..0.1)?;
 
+        let mut mesh = chart.configure_mesh();
+        let mesh = mesh.y_desc(&station_stairs[i].0).light_line_style(&WHITE);
         if i == n_stations - 1 {
-            chart
-                .configure_mesh()
-                .y_desc(&station_stairs[i].0)
-                .light_line_style(&WHITE)
-                .x_desc("xpos")
-                .draw()?;
+            mesh.x_desc("xpos").draw()?;
         } else {
-            chart
-                .configure_mesh()
-                .light_line_style(&WHITE)
-                .y_desc(&station_stairs[i].0)
-                .draw()?;
+            mesh.draw()?;
         }
 
         let res: Vec<_> = (0..=100)
