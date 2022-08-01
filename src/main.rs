@@ -161,15 +161,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if i == n_stations - 1 {
             chart
                 .configure_mesh()
-                .x_desc("xpos")
-                .y_desc("frequency")
+                .y_desc(&station_stairs[i].0)
                 .light_line_style(&WHITE)
+                .x_desc("xpos")
                 .draw()?;
         } else {
             chart
                 .configure_mesh()
-                .y_desc("frequency")
                 .light_line_style(&WHITE)
+                .y_desc(&station_stairs[i].0)
                 .draw()?;
         }
 
