@@ -56,14 +56,8 @@ fn station(
     xs
 }
 
-const OUT_FILE_NAME: &'static str = "out/out.png";
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root =
-        BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let station_stairs = [
+fn generate_data() -> (usize, Vec<(String, Vec<i32>)>, Vec<(String, Vec<f64>)>) {
+    let station_stairs = vec![
         ("0".to_string(), vec![30, 70]),
         ("1".to_string(), vec![50]),
         ("2".to_string(), vec![10]),
@@ -121,6 +115,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             train_passengers.push((station_name, xs));
         }
     }
+    (n_stations, station_stairs, train_passengers)
+}
+
+const OUT_FILE_NAME: &'static str = "out/out.png";
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let root =
+        BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    let (n_stations, station_stairs, train_passengers) = generate_data();
 
     let black_stroke = ShapeStyle {
         color: RGBAColor(0, 0, 0, 1.0),
