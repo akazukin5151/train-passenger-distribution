@@ -175,7 +175,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .build_cartesian_2d(
                 values_range.start - 1.0..values_range.end + 1.0,
                 0.0..0.1,
-                //host_list[..].into_segmented(),
             )?;
 
         chart
@@ -203,21 +202,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .draw_series(LineSeries::new(res, BLUE.filled()))
             .unwrap();
     }
-
-    //for (label, (values, style, offset)) in &series {
-    //    (values.iter().map(|x| {
-    //        chart.draw_series(LineSeries::new(
-    //            (0..=100)
-    //                .map(|num| kernel_density_estimator(x.1, 1.0, num as f64)),
-    //            style,
-    //        ))
-    //        //Boxplot::new_horizontal(SegmentValue::CenterOf(&x.0), &x.1)
-    //        //    .width(20)
-    //        //    .whisker_width(0.5)
-    //        //    .style(style)
-    //        //    .offset(*offset)
-    //    }));
-    //}
 
     let black_stroke = ShapeStyle {
         color: RGBAColor(0, 0, 0, 1.0),
