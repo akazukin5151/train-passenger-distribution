@@ -10,6 +10,10 @@ use std::collections::HashMap;
 use std::f64::consts::E;
 use std::f64::consts::PI;
 
+fn scotts(n: f64) -> f64 {
+    n.powf(-1.0 / (1.0 + 4.0))
+}
+
 fn gaussian(u: f64) -> f64 {
     1.0 / ((2.0 * PI).powi(1 / 2)) * E.powf((-1.0 / 2.0) * u.powi(2))
 }
@@ -159,45 +163,61 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         entry.0.push((x.0.clone(), &x.2));
     }
 
-    let values: Vec<f64> = dataset.iter().map(|x| x.2).flatten().collect();
+    let values: Vec<f64> =
+        dataset.iter().map(|x| x.2.clone()).flatten().collect();
     let values_range = fitting_range(values.iter());
 
-    let mut chart = ChartBuilder::on(&root)
-        .x_label_area_size(40_i32)
-        .y_label_area_size(80_i32)
-        .build_cartesian_2d(
-            values_range.start - 1.0..values_range.end + 1.0,
-            values_range.start - 1.0..values_range.end + 1.0,
-            //host_list[..].into_segmented(),
-        )?;
+    let roots = root.split_evenly((3, 1));
+    for (i, root) in roots.iter().enumerate() {
+        let mut chart = ChartBuilder::on(&root)
+            .x_label_area_size(40_i32)
+            .y_label_area_size(80_i32)
+            .build_cartesian_2d(
+                values_range.start - 1.0..values_range.end + 1.0,
+                0.0..0.1,
+                //host_list[..].into_segmented(),
+            )?;
 
-    chart
-        .configure_mesh()
-        .x_desc("xpos")
-        .y_desc("frequency")
-        .y_labels(host_list.len())
-        .light_line_style(&WHITE)
-        .draw()?;
+        chart
+            .configure_mesh()
+            .x_desc("xpos")
+            .y_desc("frequency")
+            .y_labels(host_list.len())
+            .light_line_style(&WHITE)
+            .draw()?;
 
-    chart.draw_series(LineSeries::new(
-        (0..=100)
-            .map(|num| kernel_density_estimator(series[0].0.iter().map(|(_, x) x).collect(), 1.0, num as f64)),
-        style,
-    ));
-    for (label, (values, style, offset)) in &series {
-        (values.iter().map(|x| {
-            chart.draw_series(LineSeries::new(
-                (0..=100)
-                    .map(|num| kernel_density_estimator(x.1, 1.0, num as f64)),
-                style,
-            ))
-            //Boxplot::new_horizontal(SegmentValue::CenterOf(&x.0), &x.1)
-            //    .width(20)
-            //    .whisker_width(0.5)
-            //    .style(style)
-            //    .offset(*offset)
-        }));
+        let res: Vec<_> = (0..=100)
+            .map(|num| {
+                (
+                    num as f64,
+                    kernel_density_estimator(
+                        &train_passengers[i].1,
+                        scotts(train_passengers[i].1.len() as f64) * 10.0,
+                        num as f64,
+                    ),
+                )
+            })
+            .collect();
+
+        chart
+            .draw_series(LineSeries::new(res, BLUE.filled()))
+            .unwrap();
     }
+
+    //for (label, (values, style, offset)) in &series {
+    //    (values.iter().map(|x| {
+    //        chart.draw_series(LineSeries::new(
+    //            (0..=100)
+    //                .map(|num| kernel_density_estimator(x.1, 1.0, num as f64)),
+    //            style,
+    //        ))
+    //        //Boxplot::new_horizontal(SegmentValue::CenterOf(&x.0), &x.1)
+    //        //    .width(20)
+    //        //    .whisker_width(0.5)
+    //        //    .style(style)
+    //        //    .offset(*offset)
+    //    }));
+    //}
 
     let black_stroke = ShapeStyle {
         color: RGBAColor(0, 0, 0, 1.0),
