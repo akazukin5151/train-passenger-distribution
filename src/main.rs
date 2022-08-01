@@ -1,5 +1,6 @@
 mod kde;
 use kde::*;
+use plotters::coord::Shift;
 
 use plotters::prelude::*;
 use rand::distributions::Uniform;
@@ -7,6 +8,13 @@ use rand::prelude::SliceRandom;
 use rand::Rng;
 use rand_distr::Distribution;
 use rand_distr::Normal;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let root = generate_plot(generate_data())?;
+
+    root.present()?;
+    Ok(())
+}
 
 fn clamp(xs: Vec<f64>) -> Vec<f64> {
     xs.iter()
@@ -56,7 +64,8 @@ fn station(
     xs
 }
 
-fn generate_data() -> (usize, Vec<(String, Vec<i32>)>, Vec<(String, Vec<f64>)>) {
+fn generate_data() -> (usize, Vec<(String, Vec<i32>)>, Vec<(String, Vec<f64>)>)
+{
     let station_stairs = vec![
         ("0".to_string(), vec![30, 70]),
         ("1".to_string(), vec![50]),
@@ -118,14 +127,19 @@ fn generate_data() -> (usize, Vec<(String, Vec<i32>)>, Vec<(String, Vec<f64>)>) 
     (n_stations, station_stairs, train_passengers)
 }
 
-const OUT_FILE_NAME: &'static str = "out/out.png";
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn generate_plot(
+    (n_stations, station_stairs, train_passengers): (
+        usize,
+        Vec<(String, Vec<i32>)>,
+        Vec<(String, Vec<f64>)>,
+    ),
+) -> Result<
+    DrawingArea<BitMapBackend<'static>, Shift>,
+    Box<dyn std::error::Error>,
+> {
     let root =
-        BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
+        BitMapBackend::new("out/out.png", (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
-
-    let (n_stations, station_stairs, train_passengers) = generate_data();
 
     let black_stroke = ShapeStyle {
         color: RGBAColor(0, 0, 0, 1.0),
@@ -201,7 +215,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             root.draw(&p)?;
         }
     }
-
-    root.present()?;
-    Ok(())
+    Ok(root)
 }
+
