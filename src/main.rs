@@ -149,6 +149,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let roots = root.split_evenly((3, 1));
     for (i, root) in roots.iter().enumerate() {
         let mut chart = ChartBuilder::on(&root)
+            .margin(20)
             .x_label_area_size(40_i32)
             .y_label_area_size(80_i32)
             .build_cartesian_2d(
