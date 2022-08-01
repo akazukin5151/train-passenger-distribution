@@ -1,12 +1,9 @@
-use plotters::data::fitting_range;
 use plotters::prelude::*;
 use rand::distributions::Uniform;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use rand_distr::Distribution;
 use rand_distr::Normal;
-use std::collections::BTreeMap;
-use std::collections::HashMap;
 use std::f64::consts::E;
 use std::f64::consts::PI;
 
@@ -137,36 +134,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    let ds: HashMap<(String, String), Vec<f64>> =
-        HashMap::from_iter(train_passengers.iter().map(|(station, xposes)| {
-            ((station.clone(), "".to_string()), xposes.clone())
-        }));
-
-    let dataset: Vec<(String, String, _)> = ds
-        .iter()
-        .map(|(k, v)| (k.0.clone(), k.1.clone(), v.clone()))
-        .collect();
-
-    let host_list: Vec<String> = station_stairs
-        .iter()
-        .map(|(x, _)| x.clone())
-        .rev()
-        .collect();
-
-    let mut colors = (0..).map(Palette99::pick);
-    let mut offsets = (-12..).step_by(24);
-    let mut series = BTreeMap::new();
-    for x in dataset.iter() {
-        let entry = series.entry(x.1.clone()).or_insert_with(|| {
-            (Vec::new(), colors.next().unwrap(), offsets.next().unwrap())
-        });
-        entry.0.push((x.0.clone(), &x.2));
-    }
-
-    let values: Vec<f64> =
-        dataset.iter().map(|x| x.2.clone()).flatten().collect();
-    let values_range = fitting_range(values.iter());
-
     let black_stroke = ShapeStyle {
         color: RGBAColor(0, 0, 0, 1.0),
         filled: true,
@@ -185,7 +152,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .x_label_area_size(40_i32)
             .y_label_area_size(80_i32)
             .build_cartesian_2d(
-                values_range.start - 1.0..values_range.end + 1.0,
+                0.0..100.0,
                 0.0..0.1,
             )?;
 
@@ -193,7 +160,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .configure_mesh()
             .x_desc("xpos")
             .y_desc("frequency")
-            .y_labels(host_list.len())
             .light_line_style(&WHITE)
             .draw()?;
 
@@ -210,9 +176,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             })
             .collect();
 
-        chart
-            .draw_series(LineSeries::new(res, BLUE.filled()))
-            .unwrap();
+        chart.draw_series(LineSeries::new(res, BLUE.filled()))?;
 
         let drawing_area = chart.plotting_area();
 
@@ -242,8 +206,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // To avoid the IO failure being ignored silently, we manually call the present function
-    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    root.present()?;
     println!("Result has been saved to {}", OUT_FILE_NAME);
     Ok(())
 }
