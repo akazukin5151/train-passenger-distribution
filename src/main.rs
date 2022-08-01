@@ -1,3 +1,4 @@
+#![warn(clippy::all)]
 mod data;
 mod kde;
 mod plot;
