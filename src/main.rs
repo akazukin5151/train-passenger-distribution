@@ -72,7 +72,7 @@ fn station(
     xs
 }
 
-const OUT_FILE_NAME: &'static str = "boxplot.png";
+const OUT_FILE_NAME: &'static str = "out/out.png";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
@@ -167,6 +167,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         dataset.iter().map(|x| x.2.clone()).flatten().collect();
     let values_range = fitting_range(values.iter());
 
+    let black_stroke = ShapeStyle {
+        color: RGBAColor(0, 0, 0, 1.0),
+        filled: true,
+        stroke_width: 1,
+    };
+
+    let lighter_stroke = ShapeStyle {
+        color: BLUE.mix(1.0),
+        filled: true,
+        stroke_width: 1,
+    };
+
     let roots = root.split_evenly((3, 1));
     for (i, root) in roots.iter().enumerate() {
         let mut chart = ChartBuilder::on(&root)
@@ -201,40 +213,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         chart
             .draw_series(LineSeries::new(res, BLUE.filled()))
             .unwrap();
+
+        let drawing_area = chart.plotting_area();
+
+        let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
+        let modifier = 250 * i as i32;
+        let p: PathElement<(i32, i32)> = PathElement::new(
+            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+            black_stroke,
+        );
+        root.draw(&p)?;
+
+        let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
+        let p: PathElement<(i32, i32)> = PathElement::new(
+            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+            black_stroke,
+        );
+        root.draw(&p)?;
     }
-
-    let black_stroke = ShapeStyle {
-        color: RGBAColor(0, 0, 0, 1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
-    let lighter_stroke = ShapeStyle {
-        color: BLUE.mix(1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
-    //let drawing_area = chart.plotting_area();
-    //let mapped_x_0 = drawing_area.map_coordinate(&(0.0, SegmentValue::Last)).0;
-    //let p: PathElement<(i32, i32)> = PathElement::new(
-    //    [
-    //        (mapped_x_0, 0),
-    //        (mapped_x_0, drawing_area.get_y_axis_pixel_range().end + 1),
-    //    ],
-    //    black_stroke,
-    //);
-    //root.draw(&p)?;
-
-    //let mapped_x = drawing_area.map_coordinate(&(100.0, SegmentValue::Last)).0;
-    //let p: PathElement<(i32, i32)> = PathElement::new(
-    //    [
-    //        (mapped_x, 0),
-    //        (mapped_x, drawing_area.get_y_axis_pixel_range().end + 1),
-    //    ],
-    //    black_stroke,
-    //);
-    //root.draw(&p)?;
 
     //let mapped_x = drawing_area.map_coordinate(&(30.0, SegmentValue::Last)).0;
     //let p: PathElement<(i32, i32)> = PathElement::new(
