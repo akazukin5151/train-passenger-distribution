@@ -30,7 +30,7 @@ pub fn generate_plot(
 
     let roots = root.split_evenly((n_stations, 1));
     for (i, root) in roots.iter().enumerate() {
-        let mut chart = ChartBuilder::on(&root)
+        let mut chart = ChartBuilder::on(root)
             .margin_left(10)
             .margin_right(30)
             .margin_top(10)
@@ -92,4 +92,3 @@ pub fn generate_plot(
     }
     Ok(root)
 }
-
