@@ -179,7 +179,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     num as f64,
                     kernel_density_estimator(
                         &train_passengers[i].1,
-                        scotts(train_passengers[i].1.len() as f64) * 10.0,
+                        scotts(train_passengers[i].1.len() as f64) * 12.0,
                         num as f64,
                     ),
                 )
