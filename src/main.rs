@@ -230,47 +230,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             black_stroke,
         );
         root.draw(&p)?;
+
+        let (_, stair_locations) = &station_stairs[i];
+        for stair_location in stair_locations {
+            let mapped = drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
+            let p: PathElement<(i32, i32)> = PathElement::new(
+                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+                black_stroke,
+            );
+            root.draw(&p)?;
+        }
     }
-
-    //let mapped_x = drawing_area.map_coordinate(&(30.0, SegmentValue::Last)).0;
-    //let p: PathElement<(i32, i32)> = PathElement::new(
-    //    [
-    //        (mapped_x, 0),
-    //        (mapped_x, drawing_area.get_y_axis_pixel_range().end + 1),
-    //    ],
-    //    lighter_stroke,
-    //);
-    //root.draw(&p)?;
-
-    //let mapped_x = drawing_area.map_coordinate(&(70.0, SegmentValue::Last)).0;
-    //let p: PathElement<(i32, i32)> = PathElement::new(
-    //    [
-    //        (mapped_x, 0),
-    //        (mapped_x, drawing_area.get_y_axis_pixel_range().end + 1),
-    //    ],
-    //    lighter_stroke,
-    //);
-    //root.draw(&p)?;
-
-    //let mapped_x = drawing_area.map_coordinate(&(50.0, SegmentValue::Last)).0;
-    //let p: PathElement<(i32, i32)> = PathElement::new(
-    //    [
-    //        (mapped_x, 0),
-    //        (mapped_x, drawing_area.get_y_axis_pixel_range().end + 1),
-    //    ],
-    //    lighter_stroke,
-    //);
-    //root.draw(&p)?;
-
-    //let mapped_x = drawing_area.map_coordinate(&(10.0, SegmentValue::Last)).0;
-    //let p: PathElement<(i32, i32)> = PathElement::new(
-    //    [
-    //        (mapped_x, 0),
-    //        (mapped_x, drawing_area.get_y_axis_pixel_range().end + 1),
-    //    ],
-    //    lighter_stroke,
-    //);
-    //root.draw(&p)?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
     root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
