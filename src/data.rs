@@ -3,15 +3,71 @@ use rand::prelude::SliceRandom;
 use rand::Rng;
 use rand_distr::Distribution;
 use rand_distr::Normal;
+use std::cmp::Ordering;
+use std::ops::Deref;
+use svg::parser::Event;
 
-pub fn generate_data() -> (usize, Vec<(String, Vec<i32>)>, Vec<(String, Vec<f64>)>)
-{
-    let station_stairs = vec![
-        ("0".to_string(), vec![30, 70]),
-        ("1".to_string(), vec![50]),
-        ("2".to_string(), vec![10]),
-    ];
-    let n_stations = station_stairs.len();
+fn read_data_from_file(
+    path: String,
+) -> Result<Vec<f64>, Box<dyn std::error::Error>> {
+    let mut content = String::new();
+    let events = svg::open(path, &mut content)?;
+    let mut guideline_pos: Vec<f64> = events
+        .filter_map(|event| {
+            if let Event::Tag(path, _, attrs) = event {
+                if path == "sodipodi:guide" {
+                    let raw_pos = attrs.get("position").unwrap();
+                    let pos = raw_pos.deref();
+                    // to_string() turn &str into String, which create
+                    // a new allocation and own the data, because the &str pointer
+                    // would be dropped at the end
+                    let xpos_str = pos.split(',').next().unwrap().to_string();
+                    let xpos: f64 = xpos_str.parse().unwrap();
+                    if !xpos.is_nan() {
+                        return Some(xpos);
+                    }
+                };
+            };
+            None
+        })
+        .collect();
+
+    guideline_pos.sort_by(|a, b| {
+        if a < b {
+            Ordering::Less
+        } else if a > b {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
+    });
+    let max = guideline_pos.pop().unwrap();
+    // This is O(n) but still more efficient than using VecDeque, because it needs
+    // `.make_contiguous().sort_by()` to sort and then `buf.as_slices()` to convert back
+    // to vec
+    let min = guideline_pos.remove(0);
+
+    let result = guideline_pos
+        .iter()
+        .map(|x| (x - min) / (max - min) * 100.0)
+        .collect();
+    Ok(result)
+}
+
+pub fn generate_data(
+) -> (usize, Vec<(String, Vec<f64>)>, Vec<(String, Vec<f64>)>) {
+    let stations = vec!["tokyo", "kanda", "ochanomizu"];
+    let n_stations = stations.len();
+    let station_stairs: Vec<(String, Vec<f64>)> = stations
+        .iter()
+        .map(|station| {
+            (
+                station.to_string(),
+                read_data_from_file(format!("maps/{}.svg", station)).unwrap(),
+            )
+        })
+        .collect();
+    dbg!(&station_stairs);
 
     let od_pairs = [
         (("0".to_string(), "1"), 10),
@@ -73,7 +129,7 @@ fn station(
     n_normal_far: f64,
     n_normal_close: f64,
     n_uniform: f64,
-    stair_locations: &[i32],
+    stair_locations: &[f64],
 ) -> Vec<f64> {
     let mut xs = Vec::new();
     let mut rng = rand::thread_rng();
@@ -114,4 +170,3 @@ fn clamp(xs: Vec<f64>) -> Vec<f64> {
         })
         .collect()
 }
-

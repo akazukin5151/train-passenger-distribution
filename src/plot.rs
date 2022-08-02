@@ -5,7 +5,7 @@ use plotters::prelude::*;
 pub fn generate_plot(
     (n_stations, station_stairs, train_passengers): (
         usize,
-        Vec<(String, Vec<i32>)>,
+        Vec<(String, Vec<f64>)>,
         Vec<(String, Vec<f64>)>,
     ),
 ) -> Result<
