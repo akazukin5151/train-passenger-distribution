@@ -759,7 +759,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "train-carriage-distribution"
+name = "train-passenger-distribution"
 version = "0.1.0"
 dependencies = [
  "csv",
