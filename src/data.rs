@@ -67,13 +67,12 @@ pub fn generate_data(
             )
         })
         .collect();
-    dbg!(&station_stairs);
 
     // TODO: add OD pairs from dataset
     let od_pairs = [
-        (("0".to_string(), "1"), 10),
-        (("0".to_string(), "2"), 10),
-        (("1".to_string(), "2"), 10),
+        (("tokyo".to_string(), "kanda"), 10),
+        (("tokyo".to_string(), "ochanomizu"), 10),
+        (("kanda".to_string(), "ochanomizu"), 10),
     ];
 
     let n_people = 50;
