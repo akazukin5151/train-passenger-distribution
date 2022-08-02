@@ -136,7 +136,7 @@ pub fn plot_together(
 
     let mut mesh = chart.configure_mesh();
     mesh.y_desc("frequency")
-        .axis_desc_style(("Hiragino Sans GB W3", 20).into_text_style(&root))
+        .axis_desc_style((20).into_text_style(&root))
         .light_line_style(&WHITE)
         .x_desc("xpos")
         .draw()?;
@@ -201,7 +201,7 @@ pub fn plot_together(
         .background_style(WHITE.filled())
         .border_style(&BLACK.mix(0.5))
         .legend_area_size(22)
-        .label_font("Hiragino Sans GB W3")
+        .label_font(("Hiragino Sans GB W3", 20))
         .draw()?;
 
     Ok(root.clone())
