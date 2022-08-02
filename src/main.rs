@@ -2,6 +2,7 @@
 mod data;
 mod kde;
 mod plot;
+mod types;
 
 use data::*;
 use plot::*;

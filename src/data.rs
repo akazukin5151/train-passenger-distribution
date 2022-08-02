@@ -1,3 +1,4 @@
+use crate::types::OdRow;
 use rand::distributions::Uniform;
 use rand::prelude::SliceRandom;
 use rand::Rng;
@@ -54,9 +55,21 @@ fn read_data_from_file(
     Ok(result)
 }
 
+fn read_od_row() -> Vec<OdRow> {
+    let mut rdr = csv::Reader::from_path("data/out.csv").unwrap();
+    let mut records = vec![];
+    for result in rdr.deserialize() {
+        let record: Result<OdRow, _> = result;
+        if let Ok(r) = record {
+            records.push(r);
+        }
+    }
+    records
+}
+
 pub fn generate_data(
 ) -> (usize, Vec<(String, Vec<f64>)>, Vec<(String, Vec<f64>)>) {
-    let stations = vec!["tokyo", "kanda", "ochanomizu"];
+    let stations = vec!["東京", "神田", "御茶ノ水"];
     let n_stations = stations.len();
     let station_stairs: Vec<(String, Vec<f64>)> = stations
         .iter()
@@ -69,11 +82,11 @@ pub fn generate_data(
         .collect();
 
     // TODO: add OD pairs from dataset
-    let od_pairs = [
-        (("tokyo".to_string(), "kanda"), 10),
-        (("tokyo".to_string(), "ochanomizu"), 10),
-        (("kanda".to_string(), "ochanomizu"), 10),
-    ];
+    let rows = read_od_row();
+    let od_pairs: Vec<_> = rows
+        .iter()
+        .map(|x| ((&x.from_station_code, &x.to_station_code), &x.count))
+        .collect();
 
     let n_people = 50;
     let prop_normal_far = 0.6;
@@ -104,14 +117,14 @@ pub fn generate_data(
             let prev_xs = &*prev_row.1;
             let passengers_aligning = od_pairs.iter().filter(|row| {
                 let to_station = row.0 .1;
-                to_station == station_name
+                *to_station == station_name
             });
             let n_passengers_aligning =
                 passengers_aligning.fold(0, |acc, row| {
                     let count = row.1;
                     acc + count
                 });
-            let n_passengers_in_train = prev_xs.len() + n_passengers_aligning;
+            let n_passengers_in_train = prev_xs.len() + n_passengers_aligning as usize;
             let xs_remaining_from_prev = prev_xs.choose_multiple(
                 &mut rand::thread_rng(),
                 n_passengers_in_train,
