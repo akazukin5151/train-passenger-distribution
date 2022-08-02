@@ -132,9 +132,14 @@ pub fn generate_data(
         } else {
             let prev_row = train_passengers.last().unwrap();
             let prev_xs = &*prev_row.1;
+            let previous_stations: Vec<_> =
+                train_passengers.iter().map(|x| x.0.clone()).collect();
             let passengers_aligning = od_pairs.iter().filter(|row| {
-                let to_station = row.0 .1;
-                *to_station == station_name
+                let from_to = row.0;
+                let from_station = from_to.0;
+                let to_station = from_to.1;
+                let prevs = previous_stations.contains(from_station);
+                (*to_station == station_name) && prevs
             });
             let n_passengers_aligning =
                 passengers_aligning.fold(0, |acc, row| {
