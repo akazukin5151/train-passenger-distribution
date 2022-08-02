@@ -59,11 +59,18 @@ fn read_data_from_file(
         }
     });
 
-    let result = guideline_pos
-        .iter()
-        .map(|x| (x - start) / (end - start) * 100.0)
-        .collect();
-    Ok(result)
+    // to prevent stupid mistakes in labelling
+    if start > end {
+        // if start > end then start is max and end is min
+        Ok(standardize_between(start, end, guideline_pos))
+    } else {
+        // if end > start then end is max and start is min
+        Ok(standardize_between(end, start, guideline_pos))
+    }
+}
+
+fn standardize_between(max: f64, min: f64, xs: Vec<f64>) -> Vec<f64> {
+    xs.iter().map(|x| (x - min) / (max - min) * 100.0).collect()
 }
 
 fn read_od_row() -> Vec<OdRow> {
