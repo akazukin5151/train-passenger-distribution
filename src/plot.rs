@@ -37,7 +37,7 @@ pub fn generate_plot(
             .margin_bottom(10)
             .x_label_area_size(40_i32)
             .y_label_area_size(80_i32)
-            .build_cartesian_2d(0.0..100.0, 0.0..0.07)?;
+            .build_cartesian_2d(-10.0..110.0, 0.0..0.07)?;
 
         let mut mesh = chart.configure_mesh();
         let mesh = mesh
@@ -68,7 +68,7 @@ pub fn generate_plot(
         let drawing_area = chart.plotting_area();
 
         let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
-        let modifier = 250 * i as i32;
+        let modifier = 190 * i as i32;
         let p: PathElement<(i32, i32)> = PathElement::new(
             [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
             black_stroke,

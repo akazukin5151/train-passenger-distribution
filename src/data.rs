@@ -99,7 +99,6 @@ pub fn generate_data(
         })
         .collect();
 
-    // TODO: add OD pairs from dataset
     let rows = read_od_row();
     let od_pairs: Vec<_> = rows
         .iter()
