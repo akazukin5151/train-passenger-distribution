@@ -105,7 +105,7 @@ pub fn generate_data(
         .map(|x| ((&x.from_station_code, &x.to_station_code), &x.count))
         .collect();
 
-    let n_people = 50;
+    let n_people = 200;
     let prop_normal_far = 0.6;
     let prop_uniform = 0.1;
     let prop_normal_close = 0.3;
