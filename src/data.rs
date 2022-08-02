@@ -146,6 +146,7 @@ pub fn generate_data(
                     let count = row.1;
                     acc + count
                 });
+            dbg!(n_passengers_aligning);
             let n_passengers_in_train =
                 prev_xs.len() + n_passengers_aligning as usize;
             let xs_remaining_from_prev = prev_xs.choose_multiple(
