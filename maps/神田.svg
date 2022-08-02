@@ -7,7 +7,7 @@
    width="3556"
    height="2514"
    viewBox="0 0 3556 2514"
-   sodipodi:docname="kanda.svg"
+   sodipodi:docname="神田.svg"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="2.124133"
-     inkscape:cx="989.10944"
-     inkscape:cy="727.1202"
+     inkscape:zoom="1.0620665"
+     inkscape:cx="2645.3146"
+     inkscape:cy="695.34252"
      inkscape:window-width="1920"
      inkscape:window-height="1008"
      inkscape:window-x="0"
@@ -38,9 +38,11 @@
      inkscape:current-layer="g8">
     <sodipodi:guide
        position="2461.0731,1742.2936"
-       orientation="1,0"
+       orientation="-1,0"
        id="guide135"
-       inkscape:locked="false" />
+       inkscape:locked="false"
+       inkscape:label="end"
+       inkscape:color="rgb(0,134,229)" />
     <sodipodi:guide
        position="2259.0048,1755.0064"
        orientation="1,0"
@@ -63,9 +65,11 @@
        inkscape:locked="false" />
     <sodipodi:guide
        position="717.96385,1763.8681"
-       orientation="1,0"
+       orientation="-1,0"
        id="guide240"
-       inkscape:locked="false" />
+       inkscape:locked="false"
+       inkscape:label="start"
+       inkscape:color="rgb(0,134,229)" />
   </sodipodi:namedview>
   <g
      inkscape:groupmode="layer"
