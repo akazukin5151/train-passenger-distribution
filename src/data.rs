@@ -101,11 +101,7 @@ pub fn generate_data(
         })
         .collect();
 
-    let rows = read_od_row();
-    let od_pairs: Vec<_> = rows
-        .iter()
-        .map(|x| ((&x.from_station_code, &x.to_station_code), &x.count))
-        .collect();
+    let od_pairs = read_od_row();
 
     let n_people = 200;
     let prop_normal_far = 0.6;
@@ -137,15 +133,14 @@ pub fn generate_data(
             let previous_stations: Vec<_> =
                 train_passengers.iter().map(|x| x.0.clone()).collect();
             let passengers_aligning = od_pairs.iter().filter(|row| {
-                let from_to = row.0;
-                let from_station = from_to.0;
-                let to_station = from_to.1;
+                let from_station = &row.from_station_code;
+                let to_station = &row.to_station_code;
                 let prevs = previous_stations.contains(from_station);
                 (*to_station == station_stairs.station_name) && prevs
             });
             let n_passengers_aligning =
                 passengers_aligning.fold(0, |acc, row| {
-                    let count = row.1;
+                    let count = row.count;
                     acc + count
                 });
             dbg!(n_passengers_aligning);
