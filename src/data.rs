@@ -87,7 +87,7 @@ fn read_od_row() -> Vec<OdRow> {
 
 pub fn generate_data(
     stations: Vec<&str>,
-) -> (usize, Vec<StationStairs>, Vec<(String, Vec<f64>)>) {
+) -> (usize, Vec<StationStairs>, Vec<PassengerLocations>) {
     let n_stations = stations.len();
     let station_stairs: Vec<StationStairs> = stations
         .iter()
@@ -114,7 +114,7 @@ pub fn generate_data(
     let far_stdev = 20.0;
     let close_stdev = 10.0;
 
-    let mut train_passengers: Vec<(String, Vec<f64>)> = Vec::new();
+    let mut train_passengers: Vec<PassengerLocations> = Vec::new();
 
     for station_stairs in station_stairs.clone() {
         let mut xs = generate_passenger_distributions(
@@ -126,12 +126,17 @@ pub fn generate_data(
             &station_stairs.stair_locations,
         );
         if train_passengers.is_empty() {
-            train_passengers.push((station_stairs.station_name, xs));
+            train_passengers.push(PassengerLocations {
+                station_name: station_stairs.station_name,
+                passenger_locations: xs,
+            });
         } else {
             let prev_row = train_passengers.last().unwrap();
-            let prev_xs = &*prev_row.1;
-            let previous_stations: Vec<_> =
-                train_passengers.iter().map(|x| x.0.clone()).collect();
+            let prev_xs = &*prev_row.passenger_locations;
+            let previous_stations: Vec<_> = train_passengers
+                .iter()
+                .map(|x| x.station_name.clone())
+                .collect();
             let passengers_aligning = od_pairs.iter().filter(|row| {
                 let from_station = &row.from_station_code;
                 let to_station = &row.to_station_code;
@@ -151,7 +156,10 @@ pub fn generate_data(
                 n_passengers_in_train,
             );
             xs.extend(xs_remaining_from_prev);
-            train_passengers.push((station_stairs.station_name, xs));
+            train_passengers.push(PassengerLocations {
+                station_name: station_stairs.station_name,
+                passenger_locations: xs,
+            });
         }
     }
     (n_stations, station_stairs, train_passengers)

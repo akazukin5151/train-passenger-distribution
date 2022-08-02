@@ -1,5 +1,5 @@
-use crate::types::*;
 use crate::kde::*;
+use crate::types::*;
 use plotters::coord::Shift;
 use plotters::prelude::*;
 
@@ -7,7 +7,7 @@ pub fn generate_plot(
     (n_stations, station_stairs, train_passengers): (
         usize,
         Vec<StationStairs>,
-        Vec<(String, Vec<f64>)>,
+        Vec<PassengerLocations>,
     ),
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
@@ -56,8 +56,10 @@ pub fn generate_plot(
                 (
                     num as f64,
                     kernel_density_estimator(
-                        &train_passengers[i].1,
-                        scotts(train_passengers[i].1.len() as f64) * 12.0,
+                        &train_passengers[i].passenger_locations,
+                        scotts(train_passengers[i].passenger_locations.len()
+                            as f64)
+                            * 12.0,
                         num as f64,
                     ),
                 )

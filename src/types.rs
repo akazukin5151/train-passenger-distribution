@@ -12,5 +12,11 @@ pub struct OdRow {
 #[derive(Clone, Debug)]
 pub struct StationStairs {
     pub station_name: String,
-    pub stair_locations: Vec<f64>
+    pub stair_locations: Vec<f64>,
+}
+
+#[derive(Clone, Debug)]
+pub struct PassengerLocations {
+    pub station_name: String,
+    pub passenger_locations: Vec<f64>,
 }
