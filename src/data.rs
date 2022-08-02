@@ -68,8 +68,8 @@ fn read_od_row() -> Vec<OdRow> {
 }
 
 pub fn generate_data(
+    stations: Vec<&str>
 ) -> (usize, Vec<(String, Vec<f64>)>, Vec<(String, Vec<f64>)>) {
-    let stations = vec!["東京", "神田", "御茶ノ水"];
     let n_stations = stations.len();
     let station_stairs: Vec<(String, Vec<f64>)> = stations
         .iter()
