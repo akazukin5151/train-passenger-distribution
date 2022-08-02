@@ -69,6 +69,7 @@ pub fn generate_data(
         .collect();
     dbg!(&station_stairs);
 
+    // TODO: add OD pairs from dataset
     let od_pairs = [
         (("0".to_string(), "1"), 10),
         (("0".to_string(), "2"), 10),
