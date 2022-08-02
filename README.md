@@ -22,18 +22,27 @@ This chart shows the same data but in the same plot for easier inter-station com
 
 Comparing Tokyo and Kanda, positions 60-100 has increased density after Kanda, whilst the rest of the train is more dense in Tokyo.
 
-## Further extensions
+## Potential extensions
 
 - Proper OD data (the current OD data is probably commuter tickets only)
 - Easily adjustable variables (eg, mean and stdev of normal distributions)
 - Heat equation to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
+- Consider variables such as shelter (for rainy weather)
+- Consider that some passengers will board at a location convenient for their destination station
+- Evaluate model with real world data of passenger distributions
+
+## Applications
+
+- Suggest passengers where to wait to mitigate overcrowding
+- Understand spatial processes of people in transit through detailed slices of time
+- Inform future station layout design
+- As a replacement for lack of real world measurements of passengers distributions
 
 ## Usage
 
 1. Install rust/cargo
 2. `mkdir out`
 3. `cargo run`
-
 
 ## Data sources
 
