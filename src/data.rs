@@ -127,15 +127,15 @@ pub fn generate_data(
         );
         if train_passengers.is_empty() {
             train_passengers.push(PassengerLocations {
-                station_name: this_station_stairs.station_name,
                 passenger_locations: xs,
             });
         } else {
             let prev_row = train_passengers.last().unwrap();
             let prev_xs = &*prev_row.passenger_locations;
-            let previous_stations: Vec<_> = train_passengers
+            let previous_stations: Vec<_> = all_station_stairs
                 .iter()
                 .map(|x| x.station_name.clone())
+                .take_while(|x| *x != this_station_stairs.station_name)
                 .collect();
             let passengers_aligning = od_pairs.iter().filter(|row| {
                 let from_station = &row.from_station_code;
@@ -157,7 +157,6 @@ pub fn generate_data(
             );
             xs.extend(xs_remaining_from_prev);
             train_passengers.push(PassengerLocations {
-                station_name: this_station_stairs.station_name,
                 passenger_locations: xs,
             });
         }

@@ -17,6 +17,5 @@ pub struct StationStairs {
 
 #[derive(Clone, Debug)]
 pub struct PassengerLocations {
-    pub station_name: String,
     pub passenger_locations: Vec<f64>,
 }
