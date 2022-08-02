@@ -28,6 +28,12 @@ Comparing Tokyo and Kanda, positions 60-100 has increased density after Kanda, w
 - Easily adjustable variables (eg, mean and stdev of normal distributions)
 - Heat equation to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
 
+## Usage
+
+1. Install rust/cargo
+2. `mkdir out`
+3. `cargo run`
+
 
 ## Data sources
 
