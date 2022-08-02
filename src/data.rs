@@ -89,7 +89,7 @@ pub fn generate_data(
     stations: Vec<&str>,
 ) -> (usize, Vec<StationStairs>, Vec<PassengerLocations>) {
     let n_stations = stations.len();
-    let station_stairs: Vec<StationStairs> = stations
+    let all_station_stairs: Vec<StationStairs> = stations
         .iter()
         .map(|station| StationStairs {
             station_name: station.to_string(),
@@ -116,18 +116,18 @@ pub fn generate_data(
 
     let mut train_passengers: Vec<PassengerLocations> = Vec::new();
 
-    for station_stairs in station_stairs.clone() {
+    for this_station_stairs in all_station_stairs.clone() {
         let mut xs = generate_passenger_distributions(
             far_stdev,
             close_stdev,
             n_normal_far,
             n_normal_close,
             n_uniform,
-            &station_stairs.stair_locations,
+            &this_station_stairs.stair_locations,
         );
         if train_passengers.is_empty() {
             train_passengers.push(PassengerLocations {
-                station_name: station_stairs.station_name,
+                station_name: this_station_stairs.station_name,
                 passenger_locations: xs,
             });
         } else {
@@ -141,7 +141,7 @@ pub fn generate_data(
                 let from_station = &row.from_station_code;
                 let to_station = &row.to_station_code;
                 let prevs = previous_stations.contains(from_station);
-                (*to_station == station_stairs.station_name) && prevs
+                (*to_station == this_station_stairs.station_name) && prevs
             });
             let n_passengers_aligning =
                 passengers_aligning.fold(0, |acc, row| {
@@ -157,12 +157,12 @@ pub fn generate_data(
             );
             xs.extend(xs_remaining_from_prev);
             train_passengers.push(PassengerLocations {
-                station_name: station_stairs.station_name,
+                station_name: this_station_stairs.station_name,
                 passenger_locations: xs,
             });
         }
     }
-    (n_stations, station_stairs, train_passengers)
+    (n_stations, all_station_stairs, train_passengers)
 }
 
 fn generate_passenger_distributions(
