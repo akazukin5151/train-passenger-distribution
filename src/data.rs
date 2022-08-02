@@ -68,7 +68,7 @@ fn read_od_row() -> Vec<OdRow> {
 }
 
 pub fn generate_data(
-    stations: Vec<&str>
+    stations: Vec<&str>,
 ) -> (usize, Vec<(String, Vec<f64>)>, Vec<(String, Vec<f64>)>) {
     let n_stations = stations.len();
     let station_stairs: Vec<(String, Vec<f64>)> = stations
@@ -124,7 +124,8 @@ pub fn generate_data(
                     let count = row.1;
                     acc + count
                 });
-            let n_passengers_in_train = prev_xs.len() + n_passengers_aligning as usize;
+            let n_passengers_in_train =
+                prev_xs.len() + n_passengers_aligning as usize;
             let xs_remaining_from_prev = prev_xs.choose_multiple(
                 &mut rand::thread_rng(),
                 n_passengers_in_train,

@@ -6,5 +6,5 @@ pub struct OdRow {
     pub from_station_code: String,
     pub to_station_code: String,
     pub count: i64,
-    pub stations: Vec<String>
+    pub stations: Vec<String>,
 }
