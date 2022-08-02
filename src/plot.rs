@@ -40,7 +40,10 @@ pub fn generate_plot(
             .build_cartesian_2d(0.0..100.0, 0.0..0.07)?;
 
         let mut mesh = chart.configure_mesh();
-        let mesh = mesh.y_desc(&station_stairs[i].0).light_line_style(&WHITE);
+        let mesh = mesh
+            .y_desc(&station_stairs[i].0)
+            .axis_desc_style(("Hiragino Sans GB W3", 20).into_text_style(root))
+            .light_line_style(&WHITE);
         if i == n_stations - 1 {
             mesh.x_desc("xpos").draw()?;
         } else {
