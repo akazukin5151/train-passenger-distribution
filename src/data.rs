@@ -1,4 +1,4 @@
-use crate::types::OdRow;
+use crate::types::*;
 use rand::distributions::Uniform;
 use rand::prelude::SliceRandom;
 use rand::Rng;
@@ -87,15 +87,17 @@ fn read_od_row() -> Vec<OdRow> {
 
 pub fn generate_data(
     stations: Vec<&str>,
-) -> (usize, Vec<(String, Vec<f64>)>, Vec<(String, Vec<f64>)>) {
+) -> (usize, Vec<StationStairs>, Vec<(String, Vec<f64>)>) {
     let n_stations = stations.len();
-    let station_stairs: Vec<(String, Vec<f64>)> = stations
+    let station_stairs: Vec<StationStairs> = stations
         .iter()
-        .map(|station| {
-            (
-                station.to_string(),
-                read_data_from_file(format!("maps/{}.svg", station)).unwrap(),
-            )
+        .map(|station| StationStairs {
+            station_name: station.to_string(),
+            stair_locations: read_data_from_file(format!(
+                "maps/{}.svg",
+                station
+            ))
+            .unwrap(),
         })
         .collect();
 
@@ -118,17 +120,17 @@ pub fn generate_data(
 
     let mut train_passengers: Vec<(String, Vec<f64>)> = Vec::new();
 
-    for (station_name, stair_locations) in station_stairs.clone() {
+    for station_stairs in station_stairs.clone() {
         let mut xs = generate_passenger_distributions(
             far_stdev,
             close_stdev,
             n_normal_far,
             n_normal_close,
             n_uniform,
-            &stair_locations,
+            &station_stairs.stair_locations,
         );
         if train_passengers.is_empty() {
-            train_passengers.push((station_name, xs));
+            train_passengers.push((station_stairs.station_name, xs));
         } else {
             let prev_row = train_passengers.last().unwrap();
             let prev_xs = &*prev_row.1;
@@ -139,7 +141,7 @@ pub fn generate_data(
                 let from_station = from_to.0;
                 let to_station = from_to.1;
                 let prevs = previous_stations.contains(from_station);
-                (*to_station == station_name) && prevs
+                (*to_station == station_stairs.station_name) && prevs
             });
             let n_passengers_aligning =
                 passengers_aligning.fold(0, |acc, row| {
@@ -154,7 +156,7 @@ pub fn generate_data(
                 n_passengers_in_train,
             );
             xs.extend(xs_remaining_from_prev);
-            train_passengers.push((station_name, xs));
+            train_passengers.push((station_stairs.station_name, xs));
         }
     }
     (n_stations, station_stairs, train_passengers)

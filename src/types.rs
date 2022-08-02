@@ -8,3 +8,9 @@ pub struct OdRow {
     pub count: i64,
     pub stations: Vec<String>,
 }
+
+#[derive(Clone, Debug)]
+pub struct StationStairs {
+    pub station_name: String,
+    pub stair_locations: Vec<f64>
+}

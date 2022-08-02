@@ -1,3 +1,4 @@
+use crate::types::*;
 use crate::kde::*;
 use plotters::coord::Shift;
 use plotters::prelude::*;
@@ -5,7 +6,7 @@ use plotters::prelude::*;
 pub fn generate_plot(
     (n_stations, station_stairs, train_passengers): (
         usize,
-        Vec<(String, Vec<f64>)>,
+        Vec<StationStairs>,
         Vec<(String, Vec<f64>)>,
     ),
 ) -> Result<
@@ -41,7 +42,7 @@ pub fn generate_plot(
 
         let mut mesh = chart.configure_mesh();
         let mesh = mesh
-            .y_desc(&station_stairs[i].0)
+            .y_desc(&station_stairs[i].station_name)
             .axis_desc_style(("Hiragino Sans GB W3", 20).into_text_style(root))
             .light_line_style(&WHITE);
         if i == n_stations - 1 {
@@ -82,7 +83,7 @@ pub fn generate_plot(
         );
         root.draw(&p)?;
 
-        let (_, stair_locations) = &station_stairs[i];
+        let stair_locations = &station_stairs[i].stair_locations;
         for stair_location in stair_locations {
             let mapped =
                 drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
