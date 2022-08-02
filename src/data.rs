@@ -119,7 +119,7 @@ pub fn generate_data(
     let mut train_passengers: Vec<(String, Vec<f64>)> = Vec::new();
 
     for (station_name, stair_locations) in station_stairs.clone() {
-        let mut xs = station(
+        let mut xs = generate_passenger_distributions(
             far_stdev,
             close_stdev,
             n_normal_far,
@@ -160,7 +160,7 @@ pub fn generate_data(
     (n_stations, station_stairs, train_passengers)
 }
 
-fn station(
+fn generate_passenger_distributions(
     far_stdev: f64,
     close_stdev: f64,
     n_normal_far: f64,
