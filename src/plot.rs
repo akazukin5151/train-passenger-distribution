@@ -38,7 +38,7 @@ pub fn plot_separate(
             .margin_bottom(10)
             .x_label_area_size(40_i32)
             .y_label_area_size(80_i32)
-            .build_cartesian_2d(-10.0..110.0, 0.0..0.07)?;
+            .build_cartesian_2d(-10.0..110.0, 0.0..0.06)?;
 
         let mut mesh = chart.configure_mesh();
         let mesh = mesh
@@ -132,7 +132,7 @@ pub fn plot_together(
         .margin_bottom(10)
         .x_label_area_size(40_i32)
         .y_label_area_size(80_i32)
-        .build_cartesian_2d(-10.0..110.0, 0.0..0.07)?;
+        .build_cartesian_2d(-10.0..110.0, 0.0..0.06)?;
 
     let mut mesh = chart.configure_mesh();
     mesh.y_desc("frequency")
