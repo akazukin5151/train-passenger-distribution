@@ -135,12 +135,12 @@ fn station(
     let mut rng = rand::thread_rng();
     for stair in stair_locations {
         let uniform = Uniform::new(0.0, 100.0);
-        let rand1 = Normal::new(f64::from(*stair), far_stdev)
+        let rand1 = Normal::new(*stair, far_stdev)
             .unwrap()
             .sample_iter(&mut rng)
             .take(n_normal_far as usize)
             .collect();
-        let rand2 = Normal::new(f64::from(*stair), close_stdev)
+        let rand2 = Normal::new(*stair, close_stdev)
             .unwrap()
             .sample_iter(&mut rng)
             .take(n_normal_close as usize)
