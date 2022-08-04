@@ -1,7 +1,10 @@
+use rand::prelude::IteratorRandom;
 use crate::kde::*;
 use crate::types::*;
 use plotters::coord::Shift;
 use plotters::prelude::*;
+use rand::distributions::Uniform;
+use rand::Rng;
 
 pub fn plot_separate(
     (n_stations, all_station_stairs, train_passengers): (
@@ -205,4 +208,94 @@ pub fn plot_together(
         .draw()?;
 
     Ok(root.clone())
+}
+
+pub fn plot_strip(
+    (n_stations, all_station_stairs, train_passengers): (
+        usize,
+        Vec<StationStairs>,
+        Vec<PassengerLocations>,
+    ),
+) -> Result<
+    DrawingArea<BitMapBackend<'static>, Shift>,
+    Box<dyn std::error::Error>,
+> {
+    let root =
+        BitMapBackend::new("out/strip.png", (1024, 768)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    let black_stroke = ShapeStyle {
+        color: RGBAColor(0, 0, 0, 1.0),
+        filled: true,
+        stroke_width: 1,
+    };
+
+    let lighter_stroke = ShapeStyle {
+        color: GREEN.mix(1.0),
+        filled: true,
+        stroke_width: 1,
+    };
+
+    let roots = root.split_evenly((n_stations, 1));
+    for (i, root) in roots.iter().enumerate() {
+        let mut chart = ChartBuilder::on(root)
+            .margin_left(10)
+            .margin_right(30)
+            .margin_top(10)
+            .margin_bottom(10)
+            .x_label_area_size(40_i32)
+            .y_label_area_size(80_i32)
+            .build_cartesian_2d(-10.0..110.0, 0.0..1.0)?;
+
+        let mut mesh = chart.configure_mesh();
+        let mesh = mesh
+            .y_desc(&all_station_stairs[i].station_name)
+            .axis_desc_style(("Hiragino Sans GB W3", 20).into_text_style(root))
+            .light_line_style(&WHITE);
+        if i == n_stations - 1 {
+            mesh.x_desc("xpos").draw()?;
+        } else {
+            mesh.draw()?;
+        }
+
+        let xs = &train_passengers[i].passenger_locations;
+        let uniform = Uniform::new(0.0, 1.0);
+        let ys = rand::thread_rng().sample_iter(uniform).take(xs.len());
+
+        chart.draw_series(
+            xs.iter()
+                .zip(ys)
+                .map(|(x, y)| Circle::new((*x, y), 2_i32, BLUE.filled()))
+                .choose_multiple(&mut rand::thread_rng(), 200),
+        )?;
+
+        let drawing_area = chart.plotting_area();
+
+        let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
+        let modifier = 190 * i as i32;
+        let p: PathElement<(i32, i32)> = PathElement::new(
+            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+            black_stroke,
+        );
+        root.draw(&p)?;
+
+        let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
+        let p: PathElement<(i32, i32)> = PathElement::new(
+            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+            black_stroke,
+        );
+        root.draw(&p)?;
+
+        let stair_locations = &all_station_stairs[i].stair_locations;
+        for stair_location in stair_locations {
+            let mapped =
+                drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
+            let p: PathElement<(i32, i32)> = PathElement::new(
+                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+                lighter_stroke,
+            );
+            root.draw(&p)?;
+        }
+    }
+    Ok(root)
 }
