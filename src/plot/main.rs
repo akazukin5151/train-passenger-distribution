@@ -8,8 +8,7 @@ use rand::Rng;
 use std::ops::Range;
 
 pub fn plot_kde_separate(
-    (n_stations, all_station_stairs, train_passengers): (
-        usize,
+    (all_station_stairs, train_passengers): (
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
@@ -20,7 +19,6 @@ pub fn plot_kde_separate(
     abstract_plot!(
         "out/out.png",
         0.0..0.06,
-        n_stations,
         all_station_stairs,
         |i, chart: &mut Chart!()| {
             let tp: &PassengerLocations = &train_passengers[i];
@@ -33,8 +31,7 @@ pub fn plot_kde_separate(
 }
 
 pub fn plot_kde_together(
-    (_n_stations, all_station_stairs, train_passengers): (
-        usize,
+    (all_station_stairs, train_passengers): (
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
@@ -85,8 +82,7 @@ pub fn plot_kde_together(
 }
 
 pub fn plot_strip(
-    (n_stations, all_station_stairs, train_passengers): (
-        usize,
+    (all_station_stairs, train_passengers): (
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
@@ -97,7 +93,6 @@ pub fn plot_strip(
     abstract_plot!(
         "out/strip.png",
         0.0..1.0,
-        n_stations,
         all_station_stairs,
         |i, chart: &mut Chart!()| {
             let tp: &PassengerLocations = &train_passengers[i];
@@ -118,4 +113,3 @@ pub fn plot_strip(
         }
     )
 }
-

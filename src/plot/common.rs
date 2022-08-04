@@ -3,7 +3,6 @@ macro_rules! abstract_plot {
     (
         $out_file: expr,
         $y_range: expr,
-        $n_stations:ident,
         $all_station_stairs:ident,
         $make_data:expr
     ) => {{
@@ -11,7 +10,8 @@ macro_rules! abstract_plot {
             BitMapBackend::new($out_file, (1024, 768)).into_drawing_area();
         root.fill(&WHITE)?;
 
-        let roots = root.split_evenly(($n_stations, 1));
+        let n_stations = $all_station_stairs.len();
+        let roots = root.split_evenly((n_stations, 1));
         for (i, root) in roots.iter().enumerate() {
             let mut chart = basic_chart!(&root)
                 .build_cartesian_2d::<Range<f64>, Range<f64>>(
@@ -26,7 +26,7 @@ macro_rules! abstract_plot {
                     ("Hiragino Sans GB W3", 20_i32).into_text_style(root),
                 )
                 .light_line_style(&WHITE);
-            if i == $n_stations - 1 {
+            if i == n_stations - 1 {
                 mesh.x_desc("xpos").draw()?;
             } else {
                 mesh.draw()?;

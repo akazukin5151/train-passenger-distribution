@@ -9,8 +9,7 @@ use rand_distr::Normal;
 
 pub fn generate_passenger_locations(
     stations: Vec<&str>,
-) -> (usize, Vec<StationStairs>, Vec<PassengerLocations>) {
-    let n_stations = stations.len();
+) -> (Vec<StationStairs>, Vec<PassengerLocations>) {
     let all_station_stairs: Vec<StationStairs> = stations
         .iter()
         .map(|station| StationStairs {
@@ -83,7 +82,7 @@ pub fn generate_passenger_locations(
             });
         }
     }
-    (n_stations, all_station_stairs, train_passengers)
+    (all_station_stairs, train_passengers)
 }
 
 fn generate_passenger_distribution(
