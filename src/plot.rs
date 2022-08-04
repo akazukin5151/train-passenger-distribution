@@ -31,21 +31,37 @@ macro_rules! basic_chart {
     };
 }
 
+fn black_stroke() -> ShapeStyle {
+    ShapeStyle {
+        color: RGBAColor(0, 0, 0, 1.0),
+        filled: true,
+        stroke_width: 1,
+    }
+}
+
+fn lighter_stroke() -> ShapeStyle {
+    ShapeStyle {
+        color: GREEN.mix(1.0),
+        filled: true,
+        stroke_width: 1,
+    }
+}
+
 // This is a macro to avoid lifetime issues from CT due to root
 macro_rules! plot_platform_bounds {
-    ($chart:ident, $root:ident, $black_stroke: ident, $modifier:expr) => {
+    ($chart:ident, $root:ident, $modifier:expr) => {
         let drawing_area = $chart.plotting_area();
         let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
         let p: PathElement<(i32, i32)> = PathElement::new(
             [(mapped.0, 0), (mapped.0, mapped.1 - $modifier)],
-            $black_stroke,
+            black_stroke(),
         );
         $root.draw(&p).unwrap();
 
         let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
         let p: PathElement<(i32, i32)> = PathElement::new(
             [(mapped.0, 0), (mapped.0, mapped.1 - $modifier)],
-            $black_stroke,
+            black_stroke(),
         );
         $root.draw(&p)?;
     };
@@ -63,18 +79,6 @@ macro_rules! abstract_plot {
         let root =
             BitMapBackend::new($out_file, (1024, 768)).into_drawing_area();
         root.fill(&WHITE)?;
-
-        let black_stroke = ShapeStyle {
-            color: RGBAColor(0, 0, 0, 1.0),
-            filled: true,
-            stroke_width: 1,
-        };
-
-        let lighter_stroke = ShapeStyle {
-            color: GREEN.mix(1.0),
-            filled: true,
-            stroke_width: 1,
-        };
 
         let roots = root.split_evenly(($n_stations, 1));
         for (i, root) in roots.iter().enumerate() {
@@ -100,17 +104,16 @@ macro_rules! abstract_plot {
             $make_data(i, &mut chart);
 
             let modifier = 190 * i as i32;
-            plot_platform_bounds!(chart, root, black_stroke, modifier);
+            plot_platform_bounds!(chart, root, modifier);
 
             let drawing_area = chart.plotting_area();
-
             let stair_locations = &$all_station_stairs[i].stair_locations;
             for stair_location in stair_locations {
                 let mapped =
                     drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
                 let p: PathElement<(i32, i32)> = PathElement::new(
                     [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-                    lighter_stroke,
+                    lighter_stroke(),
                 );
                 root.draw(&p)?;
             }
@@ -169,18 +172,6 @@ pub fn plot_together(
         BitMapBackend::new("out/together.png", (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
-    let black_stroke = ShapeStyle {
-        color: RGBAColor(0, 0, 0, 1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
-    let lighter_stroke = ShapeStyle {
-        color: GREEN.mix(1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
     let mut chart = basic_chart!(&root)
         .build_cartesian_2d(-10.0..110.0_f64, 0.0..0.06_f64)?;
 
@@ -217,7 +208,7 @@ pub fn plot_together(
                 Rectangle::new([(x, y - 6), (x + 12, y + 6)], style.filled())
             });
 
-        plot_platform_bounds!(chart, root, black_stroke, 0);
+        plot_platform_bounds!(chart, root, 0);
     }
 
     chart
