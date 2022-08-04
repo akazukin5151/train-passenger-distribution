@@ -122,6 +122,21 @@ macro_rules! abstract_plot {
     }};
 }
 
+fn make_kde(tp: &PassengerLocations) -> Vec<(f64, f64)> {
+    (0..=100)
+        .map(|num| {
+            (
+                num as f64,
+                kernel_density_estimator(
+                    &tp.passenger_locations,
+                    scotts(tp.passenger_locations.len() as f64) * 12.0,
+                    num as f64,
+                ),
+            )
+        })
+        .collect()
+}
+
 pub fn plot_separate(
     (n_stations, all_station_stairs, train_passengers): (
         usize,
@@ -139,18 +154,7 @@ pub fn plot_separate(
         all_station_stairs,
         |i, chart: &mut Chart!()| {
             let tp: &PassengerLocations = &train_passengers[i];
-            let res: Vec<_> = (0..=100)
-                .map(|num| {
-                    (
-                        num as f64,
-                        kernel_density_estimator(
-                            &tp.passenger_locations,
-                            scotts(tp.passenger_locations.len() as f64) * 12.0,
-                            num as f64,
-                        ),
-                    )
-                })
-                .collect();
+            let res = make_kde(tp);
             chart
                 .draw_series(LineSeries::new(res, BLUE.filled()))
                 .unwrap();
@@ -186,20 +190,7 @@ pub fn plot_together(
     for (this_station_stair, train_passenger) in
         all_station_stairs.iter().zip(train_passengers)
     {
-        let res: Vec<_> = (0..=100)
-            .map(|num| {
-                (
-                    num as f64,
-                    kernel_density_estimator(
-                        &train_passenger.passenger_locations,
-                        scotts(train_passenger.passenger_locations.len() as f64)
-                            * 12.0,
-                        num as f64,
-                    ),
-                )
-            })
-            .collect();
-
+        let res = make_kde(&train_passenger);
         let style = colors.next().unwrap();
         chart
             .draw_series(LineSeries::new(res, style.filled()))?
