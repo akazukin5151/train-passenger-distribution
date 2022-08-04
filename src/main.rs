@@ -5,7 +5,7 @@ mod plot;
 mod types;
 
 use data::*;
-use plot::*;
+use plot::main::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let stations = vec!["東京", "神田", "御茶ノ水", "四ッ谷"];
