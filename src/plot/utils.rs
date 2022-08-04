@@ -67,14 +67,11 @@ macro_rules! plot_platform_bounds {
 pub fn make_kde(tp: &PassengerLocations) -> Vec<(f64, f64)> {
     (0..=100)
         .map(|num| {
-            (
-                num as f64,
-                kernel_density_estimator(
-                    &tp.passenger_locations,
-                    scotts(tp.passenger_locations.len() as f64) * 12.0,
-                    num as f64,
-                ),
-            )
+            let x = num as f64;
+            let bandwidth = scotts(tp.passenger_locations.len() as f64) * 12.0;
+            let y =
+                kernel_density_estimator(&tp.passenger_locations, bandwidth, x);
+            (x, y)
         })
         .collect()
 }
