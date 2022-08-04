@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 use std::ops::Deref;
 use svg::parser::Event;
 
-pub fn read_data_from_file(
+pub fn read_stair_locations(
     path: String,
 ) -> Result<Vec<f64>, Box<dyn std::error::Error>> {
     let mut content = String::new();

@@ -7,7 +7,7 @@ use rand::Rng;
 use rand_distr::Distribution;
 use rand_distr::Normal;
 
-pub fn generate_data(
+pub fn generate_passenger_locations(
     stations: Vec<&str>,
 ) -> (usize, Vec<StationStairs>, Vec<PassengerLocations>) {
     let n_stations = stations.len();
@@ -15,7 +15,7 @@ pub fn generate_data(
         .iter()
         .map(|station| StationStairs {
             station_name: station.to_string(),
-            stair_locations: read_data_from_file(format!(
+            stair_locations: read_stair_locations(format!(
                 "maps/{}.svg",
                 station
             ))
@@ -39,7 +39,7 @@ pub fn generate_data(
     let mut train_passengers: Vec<PassengerLocations> = Vec::new();
 
     for this_station_stairs in all_station_stairs.clone() {
-        let mut xs = generate_passenger_distributions(
+        let mut xs = generate_passenger_distribution(
             far_stdev,
             close_stdev,
             n_normal_far,
@@ -86,7 +86,7 @@ pub fn generate_data(
     (n_stations, all_station_stairs, train_passengers)
 }
 
-fn generate_passenger_distributions(
+fn generate_passenger_distribution(
     far_stdev: f64,
     close_stdev: f64,
     n_normal_far: f64,

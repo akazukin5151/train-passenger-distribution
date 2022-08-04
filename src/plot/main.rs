@@ -7,7 +7,7 @@ use rand::prelude::IteratorRandom;
 use rand::Rng;
 use std::ops::Range;
 
-pub fn plot_separate(
+pub fn plot_kde_separate(
     (n_stations, all_station_stairs, train_passengers): (
         usize,
         Vec<StationStairs>,
@@ -32,7 +32,7 @@ pub fn plot_separate(
     )
 }
 
-pub fn plot_together(
+pub fn plot_kde_together(
     (_n_stations, all_station_stairs, train_passengers): (
         usize,
         Vec<StationStairs>,
@@ -118,3 +118,4 @@ pub fn plot_strip(
         }
     )
 }
+
