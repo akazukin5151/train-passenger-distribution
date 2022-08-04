@@ -1,10 +1,108 @@
-use rand::prelude::IteratorRandom;
 use crate::kde::*;
 use crate::types::*;
+use plotters::coord::types::RangedCoordf64;
 use plotters::coord::Shift;
 use plotters::prelude::*;
 use rand::distributions::Uniform;
+use rand::prelude::IteratorRandom;
 use rand::Rng;
+use std::ops::Range;
+
+// This is a macro to avoid lifetime issues (CharContext has a generic lifetime)
+macro_rules! Chart {
+    () => {
+        ChartContext<
+            BitMapBackend,
+            Cartesian2d<RangedCoordf64, RangedCoordf64>,
+        >
+    }
+}
+
+// This is a macro to avoid recursive CT (CoordType) bounds requiring Deref
+macro_rules! abstract_plot {
+    (
+        $out_file: expr,
+        $y_range: expr,
+        $n_stations:ident,
+        $all_station_stairs:ident,
+        $make_data:expr
+    ) => {{
+        let root =
+            BitMapBackend::new($out_file, (1024, 768)).into_drawing_area();
+        root.fill(&WHITE)?;
+
+        let black_stroke = ShapeStyle {
+            color: RGBAColor(0, 0, 0, 1.0),
+            filled: true,
+            stroke_width: 1,
+        };
+
+        let lighter_stroke = ShapeStyle {
+            color: GREEN.mix(1.0),
+            filled: true,
+            stroke_width: 1,
+        };
+
+        let roots = root.split_evenly(($n_stations, 1));
+        for (i, root) in roots.iter().enumerate() {
+            let mut chart = ChartBuilder::on(root)
+                .margin_left(10_i32)
+                .margin_right(30_i32)
+                .margin_top(10_i32)
+                .margin_bottom(10_i32)
+                .x_label_area_size(40_i32)
+                .y_label_area_size(80_i32)
+                .build_cartesian_2d::<Range<f64>, Range<f64>>(
+                    -10.0..110.0,
+                    $y_range,
+                )?;
+
+            let mut mesh = chart.configure_mesh();
+            let mesh = mesh
+                .y_desc(&$all_station_stairs[i].station_name)
+                .axis_desc_style(
+                    ("Hiragino Sans GB W3", 20_i32).into_text_style(root),
+                )
+                .light_line_style(&WHITE);
+            if i == $n_stations - 1 {
+                mesh.x_desc("xpos").draw()?;
+            } else {
+                mesh.draw()?;
+            }
+
+            $make_data(i, &mut chart);
+
+            let drawing_area = chart.plotting_area();
+
+            let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
+            let modifier = 190 * i as i32;
+            let p: PathElement<(i32, i32)> = PathElement::new(
+                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+                black_stroke,
+            );
+            root.draw(&p)?;
+
+            let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
+            let p: PathElement<(i32, i32)> = PathElement::new(
+                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+                black_stroke,
+            );
+            root.draw(&p)?;
+
+            let stair_locations = &$all_station_stairs[i].stair_locations;
+            for stair_location in stair_locations {
+                let mapped =
+                    drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
+                let p: PathElement<(i32, i32)> = PathElement::new(
+                    [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+                    lighter_stroke,
+                );
+                root.draw(&p)?;
+            }
+        }
+        Ok(root)
+    }};
+}
 
 pub fn plot_separate(
     (n_stations, all_station_stairs, train_passengers): (
@@ -16,90 +114,30 @@ pub fn plot_separate(
     DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,
 > {
-    let root =
-        BitMapBackend::new("out/out.png", (1024, 768)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let black_stroke = ShapeStyle {
-        color: RGBAColor(0, 0, 0, 1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
-    let lighter_stroke = ShapeStyle {
-        color: GREEN.mix(1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
-    let roots = root.split_evenly((n_stations, 1));
-    for (i, root) in roots.iter().enumerate() {
-        let mut chart = ChartBuilder::on(root)
-            .margin_left(10)
-            .margin_right(30)
-            .margin_top(10)
-            .margin_bottom(10)
-            .x_label_area_size(40_i32)
-            .y_label_area_size(80_i32)
-            .build_cartesian_2d(-10.0..110.0, 0.0..0.06)?;
-
-        let mut mesh = chart.configure_mesh();
-        let mesh = mesh
-            .y_desc(&all_station_stairs[i].station_name)
-            .axis_desc_style(("Hiragino Sans GB W3", 20).into_text_style(root))
-            .light_line_style(&WHITE);
-        if i == n_stations - 1 {
-            mesh.x_desc("xpos").draw()?;
-        } else {
-            mesh.draw()?;
-        }
-
-        let res: Vec<_> = (0..=100)
-            .map(|num| {
-                (
-                    num as f64,
-                    kernel_density_estimator(
-                        &train_passengers[i].passenger_locations,
-                        scotts(train_passengers[i].passenger_locations.len()
-                            as f64)
-                            * 12.0,
+    abstract_plot!(
+        "out/out.png",
+        0.0..0.06,
+        n_stations,
+        all_station_stairs,
+        |i, chart: &mut Chart!()| {
+            let tp: &PassengerLocations = &train_passengers[i];
+            let res: Vec<_> = (0..=100)
+                .map(|num| {
+                    (
                         num as f64,
-                    ),
-                )
-            })
-            .collect();
-
-        chart.draw_series(LineSeries::new(res, BLUE.filled()))?;
-
-        let drawing_area = chart.plotting_area();
-
-        let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
-        let modifier = 190 * i as i32;
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-            black_stroke,
-        );
-        root.draw(&p)?;
-
-        let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-            black_stroke,
-        );
-        root.draw(&p)?;
-
-        let stair_locations = &all_station_stairs[i].stair_locations;
-        for stair_location in stair_locations {
-            let mapped =
-                drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
-            let p: PathElement<(i32, i32)> = PathElement::new(
-                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-                lighter_stroke,
-            );
-            root.draw(&p)?;
+                        kernel_density_estimator(
+                            &tp.passenger_locations,
+                            scotts(tp.passenger_locations.len() as f64) * 12.0,
+                            num as f64,
+                        ),
+                    )
+                })
+                .collect();
+            chart
+                .draw_series(LineSeries::new(res, BLUE.filled()))
+                .unwrap();
         }
-    }
-    Ok(root)
+    )
 }
 
 pub fn plot_together(
@@ -220,82 +258,27 @@ pub fn plot_strip(
     DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,
 > {
-    let root =
-        BitMapBackend::new("out/strip.png", (1024, 768)).into_drawing_area();
-    root.fill(&WHITE)?;
+    abstract_plot!(
+        "out/strip.png",
+        0.0..1.0,
+        n_stations,
+        all_station_stairs,
+        |i, chart: &mut Chart!()| {
+            let tp: &PassengerLocations = &train_passengers[i];
+            let xs = &tp.passenger_locations;
+            let uniform = Uniform::new(0.0, 1.0_f64);
+            let ys = rand::thread_rng().sample_iter(uniform).take(xs.len());
 
-    let black_stroke = ShapeStyle {
-        color: RGBAColor(0, 0, 0, 1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
-    let lighter_stroke = ShapeStyle {
-        color: GREEN.mix(1.0),
-        filled: true,
-        stroke_width: 1,
-    };
-
-    let roots = root.split_evenly((n_stations, 1));
-    for (i, root) in roots.iter().enumerate() {
-        let mut chart = ChartBuilder::on(root)
-            .margin_left(10)
-            .margin_right(30)
-            .margin_top(10)
-            .margin_bottom(10)
-            .x_label_area_size(40_i32)
-            .y_label_area_size(80_i32)
-            .build_cartesian_2d(-10.0..110.0, 0.0..1.0)?;
-
-        let mut mesh = chart.configure_mesh();
-        let mesh = mesh
-            .y_desc(&all_station_stairs[i].station_name)
-            .axis_desc_style(("Hiragino Sans GB W3", 20).into_text_style(root))
-            .light_line_style(&WHITE);
-        if i == n_stations - 1 {
-            mesh.x_desc("xpos").draw()?;
-        } else {
-            mesh.draw()?;
+            chart
+                .draw_series(
+                    xs.iter()
+                        .zip(ys)
+                        .map(|(x, y)| {
+                            Circle::new((*x, y), 2_i32, BLUE.filled())
+                        })
+                        .choose_multiple(&mut rand::thread_rng(), 200),
+                )
+                .unwrap();
         }
-
-        let xs = &train_passengers[i].passenger_locations;
-        let uniform = Uniform::new(0.0, 1.0);
-        let ys = rand::thread_rng().sample_iter(uniform).take(xs.len());
-
-        chart.draw_series(
-            xs.iter()
-                .zip(ys)
-                .map(|(x, y)| Circle::new((*x, y), 2_i32, BLUE.filled()))
-                .choose_multiple(&mut rand::thread_rng(), 200),
-        )?;
-
-        let drawing_area = chart.plotting_area();
-
-        let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
-        let modifier = 190 * i as i32;
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-            black_stroke,
-        );
-        root.draw(&p)?;
-
-        let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-            black_stroke,
-        );
-        root.draw(&p)?;
-
-        let stair_locations = &all_station_stairs[i].stair_locations;
-        for stair_location in stair_locations {
-            let mapped =
-                drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
-            let p: PathElement<(i32, i32)> = PathElement::new(
-                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-                lighter_stroke,
-            );
-            root.draw(&p)?;
-        }
-    }
-    Ok(root)
+    )
 }
