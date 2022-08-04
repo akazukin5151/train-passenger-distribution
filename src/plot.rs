@@ -8,7 +8,7 @@ use rand::prelude::IteratorRandom;
 use rand::Rng;
 use std::ops::Range;
 
-// This is a macro to avoid lifetime issues (CharContext has a generic lifetime)
+// This is a macro to avoid lifetime issues (ChartContext has a generic lifetime)
 macro_rules! Chart {
     () => {
         ChartContext<
@@ -18,7 +18,7 @@ macro_rules! Chart {
     }
 }
 
-// This is a macro to avoid lifetime issues from ChartBuilder
+// This is a macro to avoid lifetime issues from CT due to root
 macro_rules! basic_chart {
     ($root:expr) => {
         ChartBuilder::on($root)
@@ -28,6 +28,26 @@ macro_rules! basic_chart {
             .margin_bottom(10_i32)
             .x_label_area_size(40_i32)
             .y_label_area_size(80_i32)
+    };
+}
+
+// This is a macro to avoid lifetime issues from CT due to root
+macro_rules! plot_platform_bounds {
+    ($chart:ident, $root:ident, $black_stroke: ident, $modifier:expr) => {
+        let drawing_area = $chart.plotting_area();
+        let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
+        let p: PathElement<(i32, i32)> = PathElement::new(
+            [(mapped.0, 0), (mapped.0, mapped.1 - $modifier)],
+            $black_stroke,
+        );
+        $root.draw(&p).unwrap();
+
+        let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
+        let p: PathElement<(i32, i32)> = PathElement::new(
+            [(mapped.0, 0), (mapped.0, mapped.1 - $modifier)],
+            $black_stroke,
+        );
+        $root.draw(&p)?;
     };
 }
 
@@ -79,22 +99,10 @@ macro_rules! abstract_plot {
 
             $make_data(i, &mut chart);
 
-            let drawing_area = chart.plotting_area();
-
-            let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
             let modifier = 190 * i as i32;
-            let p: PathElement<(i32, i32)> = PathElement::new(
-                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-                black_stroke,
-            );
-            root.draw(&p)?;
+            plot_platform_bounds!(chart, root, black_stroke, modifier);
 
-            let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
-            let p: PathElement<(i32, i32)> = PathElement::new(
-                [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-                black_stroke,
-            );
-            root.draw(&p)?;
+            let drawing_area = chart.plotting_area();
 
             let stair_locations = &$all_station_stairs[i].stair_locations;
             for stair_location in stair_locations {
@@ -173,8 +181,8 @@ pub fn plot_together(
         stroke_width: 1,
     };
 
-    let mut chart =
-        basic_chart!(&root).build_cartesian_2d(-10.0..110.0_f64, 0.0..0.06_f64)?;
+    let mut chart = basic_chart!(&root)
+        .build_cartesian_2d(-10.0..110.0_f64, 0.0..0.06_f64)?;
 
     let mut mesh = chart.configure_mesh();
     mesh.y_desc("frequency")
@@ -209,32 +217,7 @@ pub fn plot_together(
                 Rectangle::new([(x, y - 6), (x + 12, y + 6)], style.filled())
             });
 
-        let drawing_area = chart.plotting_area();
-
-        let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1)],
-            black_stroke,
-        );
-        root.draw(&p)?;
-
-        let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1)],
-            black_stroke,
-        );
-        root.draw(&p)?;
-
-        //let stair_locations = &this_station_stair.stair_locations;
-        //for stair_location in stair_locations {
-        //    let mapped =
-        //        drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
-        //    let p: PathElement<(i32, i32)> = PathElement::new(
-        //        [(mapped.0, 0), (mapped.0, mapped.1)],
-        //        lighter_stroke,
-        //    );
-        //    root.draw(&p)?;
-        //}
+        plot_platform_bounds!(chart, root, black_stroke, 0);
     }
 
     chart
