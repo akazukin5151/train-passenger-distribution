@@ -18,6 +18,19 @@ macro_rules! Chart {
     }
 }
 
+// This is a macro to avoid lifetime issues from ChartBuilder
+macro_rules! basic_chart {
+    ($root:expr) => {
+        ChartBuilder::on($root)
+            .margin_left(10_i32)
+            .margin_right(30_i32)
+            .margin_top(10_i32)
+            .margin_bottom(10_i32)
+            .x_label_area_size(40_i32)
+            .y_label_area_size(80_i32)
+    };
+}
+
 // This is a macro to avoid recursive CT (CoordType) bounds requiring Deref
 macro_rules! abstract_plot {
     (
@@ -45,13 +58,7 @@ macro_rules! abstract_plot {
 
         let roots = root.split_evenly(($n_stations, 1));
         for (i, root) in roots.iter().enumerate() {
-            let mut chart = ChartBuilder::on(root)
-                .margin_left(10_i32)
-                .margin_right(30_i32)
-                .margin_top(10_i32)
-                .margin_bottom(10_i32)
-                .x_label_area_size(40_i32)
-                .y_label_area_size(80_i32)
+            let mut chart = basic_chart!(&root)
                 .build_cartesian_2d::<Range<f64>, Range<f64>>(
                     -10.0..110.0,
                     $y_range,
@@ -166,14 +173,8 @@ pub fn plot_together(
         stroke_width: 1,
     };
 
-    let mut chart = ChartBuilder::on(&root)
-        .margin_left(10)
-        .margin_right(30)
-        .margin_top(10)
-        .margin_bottom(10)
-        .x_label_area_size(40_i32)
-        .y_label_area_size(80_i32)
-        .build_cartesian_2d(-10.0..110.0, 0.0..0.06)?;
+    let mut chart =
+        basic_chart!(&root).build_cartesian_2d(-10.0..110.0_f64, 0.0..0.06_f64)?;
 
     let mut mesh = chart.configure_mesh();
     mesh.y_desc("frequency")
