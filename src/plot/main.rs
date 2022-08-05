@@ -53,17 +53,21 @@ pub fn plot_kde_together(
         .x_desc("xpos")
         .draw()?;
 
-    let mut colors = (0..).map(Palette99::pick);
-    for (this_station_stair, train_passenger) in
-        all_station_stairs.iter().zip(train_passengers)
+    let colors = [
+        RGBColor(76, 114, 176),
+        RGBColor(221, 132, 82),
+        RGBColor(85, 168, 104),
+        RGBColor(196, 78, 82),
+    ];
+    for ((this_station_stair, train_passenger), color) in
+        all_station_stairs.iter().zip(train_passengers).zip(colors)
     {
         let res = make_kde(&train_passenger);
-        let style = colors.next().unwrap();
         chart
-            .draw_series(LineSeries::new(res, style.filled()))?
+            .draw_series(LineSeries::new(res, color.stroke_width(3)))?
             .label(&this_station_stair.station_name)
             .legend(move |(x, y)| {
-                Rectangle::new([(x, y - 6), (x + 12, y + 6)], style.filled())
+                Rectangle::new([(x, y - 6), (x + 12, y + 6)], color.filled())
             });
 
         plot_platform_bounds!(chart, root, 0);
