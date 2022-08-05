@@ -5,7 +5,6 @@ use rand::distributions::Uniform;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use rand_distr::Distribution;
-use rand_distr::Normal;
 
 pub fn generate_passenger_locations(
     stations: Vec<&str>,
@@ -32,8 +31,8 @@ pub fn generate_passenger_locations(
     let n_uniform = (f64::from(n_people) * prop_uniform).floor();
     let n_normal_close = (f64::from(n_people) * prop_normal_close).floor();
 
-    let far_stdev = 20.0;
-    let close_stdev = 10.0;
+    let far_stdev = 0.2;
+    let close_stdev = 0.1;
 
     let mut train_passengers: Vec<PassengerLocations> = Vec::new();
 
@@ -97,24 +96,27 @@ fn generate_passenger_distribution(
     let mut rng = rand::thread_rng();
     for stair in stair_locations {
         let uniform = Uniform::new(0.0, 100.0);
-        let rand1 = Normal::new(*stair, far_stdev)
+        let mean = clamp(*stair) / 100.0;
+        let rand1: Vec<_> = beta(mean, far_stdev)
             .unwrap()
             .sample_iter(&mut rng)
             .take(n_normal_far as usize)
+            .map(|x| x * 100.0)
             .collect();
-        let rand2 = Normal::new(*stair, close_stdev)
+        let rand2: Vec<_> = beta(mean, close_stdev)
             .unwrap()
             .sample_iter(&mut rng)
             .take(n_normal_close as usize)
+            .map(|x| x * 100.0)
             .collect();
-        let rand3 = rng
+        let rand3: Vec<_> = rng
             .clone()
             .sample_iter(uniform)
             .take(n_uniform as usize)
             .collect();
-        xs.extend(clamp(rand1));
-        xs.extend(clamp(rand2));
-        xs.extend(clamp(rand3));
+        xs.extend(rand1);
+        xs.extend(rand2);
+        xs.extend(rand3);
     }
     xs
 }
