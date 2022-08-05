@@ -97,34 +97,18 @@ fn generate_passenger_distribution(
     for stair in stair_locations {
         let uniform = Uniform::new(0.0, 100.0);
         let mean = clamp(*stair) / 100.0;
-        let rand1: Vec<_> = if mean == 0.0 {
-            FoldedNormal::new(0.3, 0.3)
-                .sample_iter(&mut rng)
-                .take(n_normal_far as usize)
-                .map(|x| x * 100.0)
-                .collect()
-        } else {
-            beta(mean, far_stdev)
-                .unwrap()
-                .sample_iter(&mut rng)
-                .take(n_normal_far as usize)
-                .map(|x| x * 100.0)
-                .collect()
-        };
-        let rand2: Vec<_> = if mean == 0.0 {
-            FoldedNormal::new(0.3, 0.3)
-                .sample_iter(&mut rng)
-                .take(n_normal_close as usize)
-                .map(|x| x * 100.0)
-                .collect()
-        } else {
-            beta(mean, close_stdev)
-                .unwrap()
-                .sample_iter(&mut rng)
-                .take(n_normal_close as usize)
-                .map(|x| x * 100.0)
-                .collect()
-        };
+        let rand1: Vec<_> = beta(mean, far_stdev)
+            .unwrap()
+            .sample_iter(&mut rng)
+            .take(n_normal_far as usize)
+            .map(|x| x * 100.0)
+            .collect();
+        let rand2: Vec<_> = beta(mean, close_stdev)
+            .unwrap()
+            .sample_iter(&mut rng)
+            .take(n_normal_close as usize)
+            .map(|x| x * 100.0)
+            .collect();
         let rand3: Vec<_> = rng
             .clone()
             .sample_iter(uniform)
