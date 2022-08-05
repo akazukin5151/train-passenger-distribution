@@ -6,7 +6,9 @@ Simulates the distribution of passengers inside a train along its journey. Highe
 
 It assumes that the biggest/only factor in the spatial distribution of passengers is the location of "stairs" (stairs and escalators) on station platforms.
 
-A random normal distribution is generated for every "stair" location, plus a smaller random uniform distribution. This is added up for every station cumulatively. Origin-destination data is used to model passengers alighting the train cumulatively.
+A random beta distribution is generated for every "stair" location, plus a smaller random uniform distribution. This is added up for every station cumulatively. Origin-destination data is used to model passengers alighting the train cumulatively.
+
+The beta distribution is used because it is more appropriate to model proportions (which is bounded between 0-1 exclusive). For values exactly at 0 and 1, it turns it into 0.01 and 0.99 for the beta distribution.
 
 ![out](examples/out.png)
 
@@ -25,7 +27,7 @@ Comparing Tokyo and Kanda, positions 60-100 has increased density after Kanda, w
 ## Potential extensions
 
 - Proper OD data (the current OD data is probably commuter tickets only)
-- Easily adjustable variables (eg, mean and stdev of normal distributions)
+- Easily adjustable variables (eg, mean and stdev of beta distributions)
 - Heat equation to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
 - Consider variables such as shelter (for rainy weather)
 - Consider that some passengers will board at a location convenient for their destination station
