@@ -24,11 +24,17 @@ This chart shows the same data but in the same plot for easier inter-station com
 
 Comparing Tokyo and Kanda, positions 60-100 has increased density after Kanda, whilst the rest of the train is more dense in Tokyo.
 
+![smoothed](examples/smoothed.png)
+
+A naive way of modeling passenger dispersion to increase personal space is to increase the bandwidth for the kernel density estimate. This chart increases the bandwidth multiplier, smoothing out small differences, emphasizing focus on broader, larger scale differences. For example, the right-side stairs in Kanda increased passenger density on the right, but then decreases after Ochanomizu and Yotsuya as their stairs are on the left and center of the platform.
+
+The proper way is to use [crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation), but the depth is out of scope for this open source repo. Hopefully it will inspire someone else to dig deeper!
+
 ## Potential extensions
 
 - Proper OD data (the current OD data is probably commuter tickets only)
 - Easily adjustable variables (eg, mean and stdev of beta distributions)
-- Heat equation to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
+- [Crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation) to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
 - Consider variables such as shelter (for rainy weather)
 - Consider that some passengers will board at a location convenient for their destination station
 - Evaluate model with real world data of passenger distributions

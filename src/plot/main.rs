@@ -12,6 +12,7 @@ pub fn plot_kde_separate(
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
+    multiplier: f64
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,
@@ -22,7 +23,7 @@ pub fn plot_kde_separate(
         all_station_stairs,
         |i, chart: &mut Chart!()| {
             let tp: &PassengerLocations = &train_passengers[i];
-            let res = make_kde(tp);
+            let res = make_kde(multiplier, tp);
             chart
                 .draw_series(LineSeries::new(res, BLUE.filled()))
                 .unwrap();
@@ -35,12 +36,14 @@ pub fn plot_kde_together(
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
+    filename: &'static str,
+    multiplier: f64
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,
 > {
     let root =
-        BitMapBackend::new("out/together.png", (1024, 768)).into_drawing_area();
+        BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
     let mut chart = basic_chart!(&root)
@@ -62,7 +65,7 @@ pub fn plot_kde_together(
     for ((this_station_stair, train_passenger), color) in
         all_station_stairs.iter().zip(train_passengers).zip(colors)
     {
-        let res = make_kde(&train_passenger);
+        let res = make_kde(multiplier, &train_passenger);
         chart
             .draw_series(LineSeries::new(res, color.stroke_width(3)))?
             .label(&this_station_stair.station_name)
