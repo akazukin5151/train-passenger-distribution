@@ -1,3 +1,4 @@
+use itertools_num::linspace;
 use crate::data::read_data::*;
 use crate::data::utils::*;
 use crate::types::*;
@@ -119,4 +120,52 @@ fn generate_passenger_distribution(
         xs.extend(rand3);
     }
     xs
+}
+
+pub fn test(stations: Vec<&str>) -> (Vec<StationStairs>, Vec<Vec<Vec<(f64, f64)>>>) {
+    let all_station_stairs: Vec<StationStairs> = stations
+        .iter()
+        .map(|station| StationStairs {
+            station_name: station.to_string(),
+            stair_locations: read_stair_locations(format!(
+                "maps/{}.svg",
+                station
+            ))
+            .unwrap(),
+        })
+        .collect();
+
+    let prop_normal_far = 0.6;
+    let prop_uniform = 0.1;
+    let prop_normal_close = 0.3;
+
+    let far_stdev = 0.2;
+    let close_stdev = 0.1;
+
+    let kde: Vec<Vec<Vec<_>>> = all_station_stairs
+        .iter()
+        .map(|this_station_stairs| {
+            let res = this_station_stairs
+                .stair_locations
+                .iter()
+                .map(|stair| {
+                    let mean = clamp(*stair) / 100.0;
+                    linspace::<f64>(0., 1., 1000)
+                        .map(move |x| {
+                            // TODO: remove alighting passengers
+                            let y = beta_(mean, far_stdev, x)
+                                * prop_normal_far
+                                + beta_(mean, close_stdev, x)
+                                    * prop_normal_close
+                                + uniform(0.0, 1.0, x) * prop_uniform
+                                ;
+                            (x, y)
+                        })
+                        .collect()
+                })
+                .collect();
+            res
+        })
+        .collect();
+    (all_station_stairs, kde)
 }

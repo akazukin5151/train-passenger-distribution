@@ -10,7 +10,7 @@ use std::ops::Range;
 pub fn plot_kde_separate(
     (all_station_stairs, train_passengers): (
         Vec<StationStairs>,
-        Vec<PassengerLocations>,
+        Vec<Vec<Vec<(f64, f64)>>>,
     ),
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
@@ -18,14 +18,37 @@ pub fn plot_kde_separate(
 > {
     abstract_plot!(
         "out/out.png",
-        0.0..0.06,
+        0.0..15.0,
         all_station_stairs,
-        |i, chart: &mut Chart!()| {
-            let tp: &PassengerLocations = &train_passengers[i];
-            let res = make_kde(tp);
+        |i: usize, chart: &mut Chart!()| {
+            let tp: Vec<Vec<(f64, f64)>> = train_passengers[i].clone();
+            assert_eq!(train_passengers.len(), all_station_stairs.len());
+            assert_eq!(tp.len(), all_station_stairs[i].stair_locations.len());
+
+            let combined: Vec<(f64, f64)> = (1..=999).map(|i| {
+                let mut res = 0.0;
+                for j in 0..tp.len() {
+                    let a = tp[j][i].1;
+                    if a != f64::INFINITY {
+                        res += a;
+                    }
+                }
+                (tp[0][i].0 * 100.0, res)
+            }).collect();
             chart
-                .draw_series(LineSeries::new(res, BLUE.filled()))
+                .draw_series(LineSeries::new(combined, BLUE.filled()))
                 .unwrap();
+
+            //for ts in tp {
+            //    let filtered: Vec<(f64, f64)> = ts
+            //        .iter()
+            //        .filter(|(_, y)| *y != f64::INFINITY)
+            //        .cloned()
+            //        .collect();
+            //    chart
+            //        .draw_series(LineSeries::new(filtered, BLUE.filled()))
+            //        .unwrap();
+            //}
         }
     )
 }
