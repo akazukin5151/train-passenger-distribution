@@ -12,21 +12,26 @@ pub fn plot_kde_separate(
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
-    multiplier: f64
+    multiplier: f64,
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,
 > {
+    let kdes = train_passengers.iter().map(|tp| make_kde(multiplier, tp));
+
     abstract_plot!(
         "out/out.png",
         0.0..0.06,
         all_station_stairs,
         |i, chart: &mut Chart!()| {
-            let tp: &PassengerLocations = &train_passengers[i];
-            let res = make_kde(multiplier, tp);
-            chart
-                .draw_series(LineSeries::new(res, BLUE.filled()))
-                .unwrap();
+            for (idx, kde) in kdes.clone().enumerate() {
+                let color = if i == idx {
+                    BLUE.stroke_width(2)
+                } else {
+                    RGBColor(100, 100, 100).filled()
+                };
+                chart.draw_series(LineSeries::new(kde, color)).unwrap();
+            }
         }
     )
 }
@@ -37,13 +42,12 @@ pub fn plot_kde_together(
         Vec<PassengerLocations>,
     ),
     filename: &'static str,
-    multiplier: f64
+    multiplier: f64,
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,
 > {
-    let root =
-        BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
+    let root = BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
     let mut chart = basic_chart!(&root)
