@@ -36,7 +36,7 @@ pub fn generate_passenger_locations(
 
     let mut train_passengers: Vec<PassengerLocations> = Vec::new();
 
-    for this_station_stairs in all_station_stairs.clone() {
+    for this_station_stairs in &all_station_stairs {
         let mut xs = generate_passenger_distribution(
             far_stdev,
             close_stdev,

@@ -16,7 +16,7 @@ const COLORS: [RGBColor; 4] = [
 ];
 
 pub fn plot_kde_separate(
-    (all_station_stairs, train_passengers): (
+    (all_station_stairs, train_passengers): &(
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
@@ -46,7 +46,7 @@ pub fn plot_kde_separate(
 }
 
 pub fn plot_kde_together(
-    (all_station_stairs, train_passengers): (
+    (all_station_stairs, train_passengers): &(
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
@@ -72,7 +72,7 @@ pub fn plot_kde_together(
     for ((this_station_stair, train_passenger), color) in
         all_station_stairs.iter().zip(train_passengers).zip(COLORS)
     {
-        let res = make_kde(multiplier, &train_passenger);
+        let res = make_kde(multiplier, train_passenger);
         chart
             .draw_series(LineSeries::new(res, color.stroke_width(3)))?
             .label(&this_station_stair.station_name)
@@ -96,7 +96,7 @@ pub fn plot_kde_together(
 }
 
 pub fn plot_strip(
-    (all_station_stairs, train_passengers): (
+    (all_station_stairs, train_passengers): &(
         Vec<StationStairs>,
         Vec<PassengerLocations>,
     ),
