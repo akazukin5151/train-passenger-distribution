@@ -7,6 +7,14 @@ use rand::prelude::IteratorRandom;
 use rand::Rng;
 use std::ops::Range;
 
+
+const COLORS: [RGBColor; 4] = [
+    RGBColor(76, 114, 176),
+    RGBColor(221, 132, 82),
+    RGBColor(85, 168, 104),
+    RGBColor(196, 78, 82),
+];
+
 pub fn plot_kde_separate(
     (all_station_stairs, train_passengers): (
         Vec<StationStairs>,
@@ -26,7 +34,8 @@ pub fn plot_kde_separate(
         |i, chart: &mut Chart!()| {
             for (idx, kde) in kdes.clone().enumerate() {
                 let color = if i == idx {
-                    BLUE.stroke_width(2)
+                    let c: RGBColor = COLORS[i];
+                    c.stroke_width(2)
                 } else {
                     RGBColor(100, 100, 100).filled()
                 };
@@ -60,14 +69,8 @@ pub fn plot_kde_together(
         .x_desc("xpos")
         .draw()?;
 
-    let colors = [
-        RGBColor(76, 114, 176),
-        RGBColor(221, 132, 82),
-        RGBColor(85, 168, 104),
-        RGBColor(196, 78, 82),
-    ];
     for ((this_station_stair, train_passenger), color) in
-        all_station_stairs.iter().zip(train_passengers).zip(colors)
+        all_station_stairs.iter().zip(train_passengers).zip(COLORS)
     {
         let res = make_kde(multiplier, &train_passenger);
         chart
