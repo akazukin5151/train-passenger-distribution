@@ -49,23 +49,12 @@ fn plot_initial<T>(
 
 fn plot_alighting(
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    n_passengers_alighting: i64,
-    tokyo_train_passenger: &[f64],
-) -> Result<Vec<f64>, Box<dyn std::error::Error>> {
+    mut alight_xs: &mut dyn Iterator<Item = &f64>,
+    mut remaining_xs: &mut dyn Iterator<Item = &f64>,
+) -> Result<(), Box<dyn std::error::Error>> {
     // data
-    let alight_xs: Vec<_> = tokyo_train_passenger
-        .choose_multiple(
-            &mut rand::thread_rng(),
-            n_passengers_alighting.try_into().unwrap(),
-        )
-        .collect();
     let uniform = Uniform::new(0.0, 1.0_f64);
     let alight_ys = rand::thread_rng().sample_iter(uniform);
-
-    let mut remaining_xs = tokyo_train_passenger
-        .iter()
-        .filter(|x| alight_xs.contains(x));
-
     let remaining_ys = rand::thread_rng().sample_iter(uniform);
 
     // plot
@@ -74,13 +63,7 @@ fn plot_alighting(
     root.titled("Passengers alighting at Kanda", ("sans-serif", 30))?;
     let mut chart = chart_with_mesh!(root, 0.0..1.0_f64);
 
-    plot_points(
-        &mut chart,
-        &mut alight_xs.iter().cloned(),
-        alight_ys,
-        RED,
-        "Alighting",
-    )?;
+    plot_points(&mut chart, &mut alight_xs, alight_ys, RED, "Alighting")?;
     plot_points(
         &mut chart,
         &mut remaining_xs,
@@ -91,7 +74,7 @@ fn plot_alighting(
 
     plot_platform_bounds(&chart, root, 30)?;
     add_legend!(&mut chart);
-    Ok(remaining_xs.cloned().collect())
+    Ok(())
 }
 
 fn plot_boarding(
@@ -132,16 +115,13 @@ fn plot_boarding(
 }
 
 fn plot_combined<T>(
-    remaining_xs: Vec<f64>,
+    xs: Vec<f64>,
     n_stairs: usize,
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    kanda_combined: Vec<f64>,
     multiplier: f64,
     kanda: &[(f64, T, T, T)],
 ) -> Result<(), Box<dyn std::error::Error>> {
     // data
-    let xs: Vec<_> =
-        remaining_xs.iter().cloned().chain(kanda_combined).collect();
     let kde = make_kde(multiplier, &xs);
 
     // plot
@@ -185,14 +165,25 @@ pub fn plot_step_by_step(
     let roots = root.split_evenly((n_stairs + 3, 1));
 
     // already in the train
+    // as tokyo is the first station, no need to remove passengers that alighted
+    // in tokyo. but for other stations after kanda, all preceeding stations
+    // need to have their combined net distribution calculated first
     let tokyo_train_passenger = sum_boarding_types(&tokyo);
     plot_initial(&roots, &tokyo_train_passenger, multiplier, &tokyo)?;
 
     // alighting
-    // note that this is not recursive, so for the 3rd station,
-    // need to call for 2nd station first
-    let remaining_xs =
-        plot_alighting(&roots, n_passengers_alighting, &tokyo_train_passenger)?;
+    let alight_xs: Vec<_> = tokyo_train_passenger
+        .choose_multiple(
+            &mut rand::thread_rng(),
+            n_passengers_alighting.try_into().unwrap(),
+        )
+        .collect();
+
+    let mut remaining_xs = tokyo_train_passenger
+        .iter()
+        .filter(|x| alight_xs.contains(x));
+
+    plot_alighting(&roots, &mut alight_xs.iter().cloned(), &mut remaining_xs)?;
 
     // boarding
     plot_boarding(&roots, &kanda, multiplier)?;
@@ -200,10 +191,9 @@ pub fn plot_step_by_step(
     // combined
     let kanda_combined = sum_boarding_types(&kanda);
     plot_combined(
-        remaining_xs,
+        remaining_xs.cloned().chain(kanda_combined).collect(),
         n_stairs,
         &roots,
-        kanda_combined,
         multiplier,
         &kanda,
     )?;
