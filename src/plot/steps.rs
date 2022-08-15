@@ -24,7 +24,7 @@ fn sum_boarding_types<T>(
 
 fn plot_initial<T>(
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    tokyo_train_passenger: &PassengerLocations,
+    tokyo_train_passenger: &Vec<f64>,
     multiplier: f64,
     tokyo: &[(f64, T, T, T)],
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -61,7 +61,7 @@ fn plot_initial<T>(
 fn plot_alighting(
     roots: &[DrawingArea<BitMapBackend, Shift>],
     n_passengers_alighting: i64,
-    tokyo_train_passenger: &PassengerLocations,
+    tokyo_train_passenger: &Vec<f64>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let i = 1;
     let root = &roots[i];
@@ -77,7 +77,6 @@ fn plot_alighting(
         .draw()?;
 
     let alight_xs: Vec<_> = tokyo_train_passenger
-        .passenger_locations
         .choose_multiple(
             &mut rand::thread_rng(),
             n_passengers_alighting.try_into().unwrap(),
@@ -100,7 +99,6 @@ fn plot_alighting(
         });
 
     let remaining_xs = tokyo_train_passenger
-        .passenger_locations
         .iter()
         .filter(|x| alight_xs.contains(x));
 
@@ -156,10 +154,7 @@ fn plot_boarding(
         for ((xs, label), color) in
             [far, close, uni].iter().zip(labels).zip(COLORS)
         {
-            let train_passenger = PassengerLocations {
-                passenger_locations: xs.to_vec(),
-            };
-            let kde = make_kde(multiplier, &train_passenger);
+            let kde = make_kde(multiplier, &xs);
             chart
                 .draw_series(LineSeries::new(kde, color.stroke_width(2)))?
                 .label(label)
@@ -200,7 +195,7 @@ fn plot_combined<T>(
     n_stairs: usize,
     roots: &[DrawingArea<BitMapBackend, Shift>],
     n_passengers_alighting: i64,
-    tokyo_train_passenger: &PassengerLocations,
+    tokyo_train_passenger: &Vec<f64>,
     kanda_combined: Vec<f64>,
     multiplier: f64,
     kanda: &[(f64, T, T, T)],
@@ -220,21 +215,16 @@ fn plot_combined<T>(
         .draw()?;
 
     let xs: Vec<_> = tokyo_train_passenger
-        .passenger_locations
         .choose_multiple(
             &mut rand::thread_rng(),
-            (tokyo_train_passenger.passenger_locations.len() as i64
-                - n_passengers_alighting)
+            (tokyo_train_passenger.len() as i64 - n_passengers_alighting)
                 .try_into()
                 .unwrap(),
         )
         .cloned()
         .chain(kanda_combined)
         .collect();
-    let tp = PassengerLocations {
-        passenger_locations: xs,
-    };
-    let kde = make_kde(multiplier, &tp);
+    let kde = make_kde(multiplier, &xs);
     chart.draw_series(LineSeries::new(kde, BLUE.stroke_width(2)))?;
 
     let modifier = 0;
@@ -275,9 +265,7 @@ pub fn plot_step_by_step(
     let roots = root.split_evenly((n_stairs + 3, 1));
 
     // already in the train
-    let tokyo_train_passenger = PassengerLocations {
-        passenger_locations: sum_boarding_types(&tokyo),
-    };
+    let tokyo_train_passenger = sum_boarding_types(&tokyo);
     plot_initial(&roots, &tokyo_train_passenger, multiplier, &tokyo)?;
 
     // alighting

@@ -8,7 +8,7 @@ use rand_distr::Distribution;
 
 pub fn generate_passenger_locations(
     stations: Vec<&str>,
-) -> (Vec<StationStairs>, Vec<PassengerLocations>) {
+) -> (Vec<StationStairs>, Vec<Vec<f64>>) {
     let all_station_stairs: Vec<StationStairs> = stations
         .iter()
         .map(|station| StationStairs {
@@ -34,7 +34,7 @@ pub fn generate_passenger_locations(
     let far_stdev = 0.2;
     let close_stdev = 0.1;
 
-    let mut train_passengers: Vec<PassengerLocations> = Vec::new();
+    let mut train_passengers: Vec<Vec<f64>> = Vec::new();
 
     for this_station_stairs in &all_station_stairs {
         let mut xs = generate_passenger_distribution(
@@ -46,12 +46,9 @@ pub fn generate_passenger_locations(
             &this_station_stairs.stair_locations,
         );
         if train_passengers.is_empty() {
-            train_passengers.push(PassengerLocations {
-                passenger_locations: xs,
-            });
+            train_passengers.push(xs);
         } else {
-            let prev_row = train_passengers.last().unwrap();
-            let prev_xs = &*prev_row.passenger_locations;
+            let prev_xs = train_passengers.last().unwrap();
             let previous_stations: Vec<_> = all_station_stairs
                 .iter()
                 .map(|x| x.station_name.clone())
@@ -76,9 +73,7 @@ pub fn generate_passenger_locations(
                 n_passengers_in_train,
             );
             xs.extend(xs_remaining_from_prev);
-            train_passengers.push(PassengerLocations {
-                passenger_locations: xs,
-            });
+            train_passengers.push(xs);
         }
     }
     (all_station_stairs, train_passengers)

@@ -17,7 +17,7 @@ pub const COLORS: [RGBColor; 4] = [
 pub fn plot_kde_separate(
     (all_station_stairs, train_passengers): &(
         Vec<StationStairs>,
-        Vec<PassengerLocations>,
+        Vec<Vec<f64>>,
     ),
     multiplier: f64,
 ) -> Result<
@@ -47,7 +47,7 @@ pub fn plot_kde_separate(
 pub fn plot_kde_together(
     (all_station_stairs, train_passengers): &(
         Vec<StationStairs>,
-        Vec<PassengerLocations>,
+        Vec<Vec<f64>>,
     ),
     filename: &'static str,
     multiplier: f64,
@@ -97,7 +97,7 @@ pub fn plot_kde_together(
 pub fn plot_strip(
     (all_station_stairs, train_passengers): &(
         Vec<StationStairs>,
-        Vec<PassengerLocations>,
+        Vec<Vec<f64>>,
     ),
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
@@ -108,8 +108,7 @@ pub fn plot_strip(
         0.0..1.0,
         all_station_stairs,
         |i, chart: &mut Chart!()| {
-            let tp: &PassengerLocations = &train_passengers[i];
-            let xs = &tp.passenger_locations;
+            let xs: &Vec<f64> = &train_passengers[i];
             let uniform = Uniform::new(0.0, 1.0_f64);
             let ys = rand::thread_rng().sample_iter(uniform).take(xs.len());
 

@@ -15,7 +15,3 @@ pub struct StationStairs {
     pub stair_locations: Vec<f64>,
 }
 
-#[derive(Clone, Debug)]
-pub struct PassengerLocations {
-    pub passenger_locations: Vec<f64>,
-}
