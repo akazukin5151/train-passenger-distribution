@@ -17,10 +17,8 @@ pub const COLORS: [RGBColor; 4] = [
 ];
 
 pub fn plot_kde_separate(
-    (all_station_stairs, train_passengers): &(
-        Vec<StationStairs>,
-        Vec<Vec<f64>>,
-    ),
+    all_station_stairs: &Vec<StationStairs>,
+    train_passengers: &Vec<Vec<f64>>,
     multiplier: f64,
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
@@ -47,10 +45,8 @@ pub fn plot_kde_separate(
 }
 
 pub fn plot_kde_together(
-    (all_station_stairs, train_passengers): &(
-        Vec<StationStairs>,
-        Vec<Vec<f64>>,
-    ),
+    all_station_stairs: &Vec<StationStairs>,
+    train_passengers: &Vec<Vec<f64>>,
     filename: &'static str,
     multiplier: f64,
 ) -> Result<
@@ -97,10 +93,8 @@ pub fn plot_kde_together(
 }
 
 pub fn plot_strip(
-    (all_station_stairs, train_passengers): &(
-        Vec<StationStairs>,
-        Vec<Vec<f64>>,
-    ),
+    all_station_stairs: &Vec<StationStairs>,
+    train_passengers: &Vec<Vec<f64>>,
 ) -> Result<
     DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,

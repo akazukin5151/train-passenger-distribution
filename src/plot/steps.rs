@@ -1,6 +1,7 @@
 use crate::kde::make_kde;
 use crate::plot::colors::*;
 use crate::plot::utils::*;
+use crate::sum_boarding_types;
 use crate::COLORS;
 use plotters::coord::Shift;
 use plotters::drawing::DrawingArea;
@@ -8,19 +9,6 @@ use plotters::prelude::*;
 use rand::distributions::Uniform;
 use rand::prelude::SliceRandom;
 use rand::Rng;
-
-fn sum_boarding_types<T>(
-    boarding: &[(T, Vec<f64>, Vec<f64>, Vec<f64>)],
-) -> Vec<f64> {
-    boarding
-        .iter()
-        .fold(vec![], |mut acc, (_, far, close, uni)| {
-            acc.extend(far);
-            acc.extend(close);
-            acc.extend(uni);
-            acc
-        })
-}
 
 fn plot_initial<T>(
     roots: &[DrawingArea<BitMapBackend, Shift>],
