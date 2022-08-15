@@ -78,7 +78,7 @@ fn plot_alighting(
     roots: &[DrawingArea<BitMapBackend, Shift>],
     n_passengers_alighting: i64,
     tokyo_train_passenger: &[f64],
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<Vec<f64>, Box<dyn std::error::Error>> {
     // data
     let alight_xs: Vec<_> = tokyo_train_passenger
         .choose_multiple(
@@ -115,6 +115,7 @@ fn plot_alighting(
     chart
         .draw_series(
             remaining_xs
+                .clone()
                 .zip(remaining_ys)
                 .map(|(x, y)| Circle::new((*x, y), 2_i32, GRAY.filled()))
                 .choose_multiple(&mut rand::thread_rng(), 200),
@@ -124,7 +125,7 @@ fn plot_alighting(
 
     plot_platform_bounds(&chart, root, 30)?;
     add_legend!(&mut chart);
-    Ok(())
+    Ok(remaining_xs.cloned().collect())
 }
 
 fn plot_boarding(
@@ -165,25 +166,16 @@ fn plot_boarding(
 }
 
 fn plot_combined<T>(
+    remaining_xs: Vec<f64>,
     n_stairs: usize,
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    n_passengers_alighting: i64,
-    tokyo_train_passenger: &[f64],
     kanda_combined: Vec<f64>,
     multiplier: f64,
     kanda: &[(f64, T, T, T)],
 ) -> Result<(), Box<dyn std::error::Error>> {
     // data
-    let xs: Vec<_> = tokyo_train_passenger
-        .choose_multiple(
-            &mut rand::thread_rng(),
-            (tokyo_train_passenger.len() as i64 - n_passengers_alighting)
-                .try_into()
-                .unwrap(),
-        )
-        .cloned()
-        .chain(kanda_combined)
-        .collect();
+    let xs: Vec<_> =
+        remaining_xs.iter().cloned().chain(kanda_combined).collect();
     let kde = make_kde(multiplier, &xs);
 
     // plot
@@ -233,7 +225,8 @@ pub fn plot_step_by_step(
     // alighting
     // note that this is not recursive, so for the 3rd station,
     // need to call for 2nd station first
-    plot_alighting(&roots, n_passengers_alighting, &tokyo_train_passenger)?;
+    let remaining_xs =
+        plot_alighting(&roots, n_passengers_alighting, &tokyo_train_passenger)?;
 
     // boarding
     plot_boarding(&roots, &kanda, multiplier)?;
@@ -241,10 +234,9 @@ pub fn plot_step_by_step(
     // combined
     let kanda_combined = sum_boarding_types(&kanda);
     plot_combined(
+        remaining_xs,
         n_stairs,
         &roots,
-        n_passengers_alighting,
-        &tokyo_train_passenger,
         kanda_combined,
         multiplier,
         &kanda,
