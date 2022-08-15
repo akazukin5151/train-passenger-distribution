@@ -28,6 +28,8 @@ macro_rules! basic_chart {
     };
 }
 
+pub const GRAY: RGBColor = RGBColor(100, 100, 100);
+
 pub fn black_stroke() -> ShapeStyle {
     ShapeStyle {
         color: RGBAColor(0, 0, 0, 1.0),
@@ -68,7 +70,8 @@ pub fn make_kde(multiplier: f64, tp: &PassengerLocations) -> Vec<(f64, f64)> {
     (0..=100)
         .map(|num| {
             let x = num as f64;
-            let bandwidth = scotts(tp.passenger_locations.len() as f64) * multiplier;
+            let bandwidth =
+                scotts(tp.passenger_locations.len() as f64) * multiplier;
             let y =
                 kernel_density_estimator(&tp.passenger_locations, bandwidth, x);
             (x, y)

@@ -7,8 +7,7 @@ use rand::prelude::IteratorRandom;
 use rand::Rng;
 use std::ops::Range;
 
-
-const COLORS: [RGBColor; 4] = [
+pub const COLORS: [RGBColor; 4] = [
     RGBColor(76, 114, 176),
     RGBColor(221, 132, 82),
     RGBColor(85, 168, 104),
@@ -37,7 +36,7 @@ pub fn plot_kde_separate(
                     let c: RGBColor = COLORS[i];
                     c.stroke_width(2)
                 } else {
-                    RGBColor(100, 100, 100).filled()
+                    GRAY.filled()
                 };
                 chart.draw_series(LineSeries::new(kde, color)).unwrap();
             }

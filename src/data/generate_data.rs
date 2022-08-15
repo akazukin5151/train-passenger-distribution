@@ -63,14 +63,14 @@ pub fn generate_passenger_locations(
                 let prevs = previous_stations.contains(from_station);
                 (*to_station == this_station_stairs.station_name) && prevs
             });
-            let n_passengers_aligning =
+            let n_passengers_alighting =
                 passengers_aligning.fold(0, |acc, row| {
                     let count = row.count;
                     acc + count
                 });
-            dbg!(n_passengers_aligning);
+            dbg!(n_passengers_alighting);
             let n_passengers_in_train =
-                prev_xs.len() + n_passengers_aligning as usize;
+                prev_xs.len() + n_passengers_alighting as usize;
             let xs_remaining_from_prev = prev_xs.choose_multiple(
                 &mut rand::thread_rng(),
                 n_passengers_in_train,
@@ -119,4 +119,132 @@ fn generate_passenger_distribution(
         xs.extend(rand3);
     }
     xs
+}
+
+fn stairs_to_beta(far_stdev: f64, n_normal_far: f64, stair: f64) -> Vec<f64> {
+    let mut rng = rand::thread_rng();
+    let mean = clamp(stair) / 100.0;
+    beta(mean, far_stdev)
+        .unwrap()
+        .sample_iter(&mut rng)
+        .take(n_normal_far as usize)
+        .map(|x| x * 100.0)
+        .collect()
+}
+
+fn stairs_to_uniform(n_uniform: f64) -> Vec<f64> {
+    let rng = rand::thread_rng();
+    let uniform = Uniform::new(0.0, 100.0);
+    rng.clone()
+        .sample_iter(uniform)
+        .take(n_uniform as usize)
+        .collect()
+}
+
+pub fn test(
+    stations: Vec<&str>,
+) -> Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>> {
+    let all_station_stairs: Vec<StationStairs> = stations
+        .iter()
+        .map(|station| StationStairs {
+            station_name: station.to_string(),
+            stair_locations: read_stair_locations(format!(
+                "maps/{}.svg",
+                station
+            ))
+            .unwrap(),
+        })
+        .collect();
+
+    let n_people = 200;
+    let prop_normal_far = 0.6;
+    let prop_uniform = 0.1;
+    let prop_normal_close = 0.3;
+    let n_normal_far = (f64::from(n_people) * prop_normal_far).floor();
+    let n_uniform = (f64::from(n_people) * prop_uniform).floor();
+    let n_normal_close = (f64::from(n_people) * prop_normal_close).floor();
+
+    let far_stdev = 0.2;
+    let close_stdev = 0.1;
+
+    all_station_stairs
+        .iter()
+        .map(|this_station_stairs| {
+            this_station_stairs
+                .stair_locations
+                .iter()
+                .map(|stair_location| {
+                    let far = stairs_to_beta(
+                        far_stdev,
+                        n_normal_far,
+                        *stair_location,
+                    );
+                    let close = stairs_to_beta(
+                        close_stdev,
+                        n_normal_close,
+                        *stair_location,
+                    );
+                    let uniform = stairs_to_uniform(n_uniform);
+                    (*stair_location, far, close, uniform)
+                })
+                .collect()
+        })
+        .collect()
+}
+
+pub fn make_cumulative<'a>(
+    index: usize,
+    stations: Vec<&str>,
+    train_passengers: &Vec<&'a PassengerLocations>,
+) -> i64 {
+    let all_station_stairs: Vec<StationStairs> = stations
+        .iter()
+        .map(|station| StationStairs {
+            station_name: station.to_string(),
+            stair_locations: read_stair_locations(format!(
+                "maps/{}.svg",
+                station
+            ))
+            .unwrap(),
+        })
+        .collect();
+    let od_pairs = read_od_row();
+    //let mut new_tp = train_passengers.clone();
+    //if index > 1 {
+    //    new_tp[index - 1] = make_cumulative(
+    //        index - 1,
+    //        all_station_stairs.clone(),
+    //        od_pairs.clone(),
+    //        new_tp.clone(),
+    //    );
+    //}
+    let this_station_stairs = &all_station_stairs[index];
+    let prev_row = train_passengers[index - 1];
+    let prev_xs = &prev_row.passenger_locations;
+    let previous_stations: Vec<_> = all_station_stairs
+        .iter()
+        .map(|x| x.station_name.clone())
+        .take_while(|x| *x != this_station_stairs.station_name)
+        .collect();
+    let passengers_aligning = od_pairs.iter().filter(|row| {
+        let from_station = &row.from_station_code;
+        let to_station = &row.to_station_code;
+        let prevs = previous_stations.contains(from_station);
+        (*to_station == this_station_stairs.station_name) && prevs
+    });
+    let n_passengers_alighting = passengers_aligning.fold(0, |acc, row| {
+        let count = row.count;
+        acc + count
+    });
+    dbg!(n_passengers_alighting);
+    n_passengers_alighting
+    //let n_passengers_in_train = prev_xs.len() + n_passengers_alighting as usize;
+    //let passengers_alighting = prev_xs
+    //    .choose_multiple(
+    //        &mut rand::thread_rng(),
+    //        n_passengers_alighting.try_into().unwrap(),
+    //    )
+    //    .collect();
+
+    //passengers_alighting
 }
