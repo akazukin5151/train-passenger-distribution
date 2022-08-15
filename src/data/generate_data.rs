@@ -130,10 +130,7 @@ fn stairs_to_beta(far_stdev: f64, n_normal_far: f64, stair: f64) -> Vec<f64> {
 fn stairs_to_uniform(n_uniform: f64) -> Vec<f64> {
     let rng = rand::thread_rng();
     let uniform = Uniform::new(0.0, 100.0);
-    rng.clone()
-        .sample_iter(uniform)
-        .take(n_uniform as usize)
-        .collect()
+    rng.sample_iter(uniform).take(n_uniform as usize).collect()
 }
 
 pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {

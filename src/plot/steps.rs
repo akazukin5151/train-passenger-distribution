@@ -1,5 +1,4 @@
 use crate::plot::utils::*;
-use crate::types::*;
 use crate::COLORS;
 use plotters::coord::Shift;
 use plotters::drawing::DrawingArea;
@@ -10,7 +9,7 @@ use rand::Rng;
 use rand_distr::Uniform;
 
 fn sum_boarding_types<T>(
-    boarding: &Vec<(T, Vec<f64>, Vec<f64>, Vec<f64>)>,
+    boarding: &[(T, Vec<f64>, Vec<f64>, Vec<f64>)],
 ) -> Vec<f64> {
     boarding.iter().fold(vec![], |acc, (_, far, close, uni)| {
         let mut xs = vec![];
@@ -24,7 +23,7 @@ fn sum_boarding_types<T>(
 
 fn plot_initial<T>(
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    tokyo_train_passenger: &Vec<f64>,
+    tokyo_train_passenger: &[f64],
     multiplier: f64,
     tokyo: &[(f64, T, T, T)],
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -61,7 +60,7 @@ fn plot_initial<T>(
 fn plot_alighting(
     roots: &[DrawingArea<BitMapBackend, Shift>],
     n_passengers_alighting: i64,
-    tokyo_train_passenger: &Vec<f64>,
+    tokyo_train_passenger: &[f64],
 ) -> Result<(), Box<dyn std::error::Error>> {
     let i = 1;
     let root = &roots[i];
@@ -130,11 +129,11 @@ fn plot_alighting(
 
 fn plot_boarding(
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    kanda: &Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>,
+    kanda: &[(f64, Vec<f64>, Vec<f64>, Vec<f64>)],
     multiplier: f64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     for (i, (root, (stair, far, close, uni))) in
-        roots.iter().skip(2).zip(kanda.clone()).enumerate()
+        roots.iter().skip(2).zip(kanda).enumerate()
     {
         root.titled(
             &format!("Passengers boarding at Kanda stair #{}", i + 1),
@@ -154,7 +153,7 @@ fn plot_boarding(
         for ((xs, label), color) in
             [far, close, uni].iter().zip(labels).zip(COLORS)
         {
-            let kde = make_kde(multiplier, &xs);
+            let kde = make_kde(multiplier, xs);
             chart
                 .draw_series(LineSeries::new(kde, color.stroke_width(2)))?
                 .label(label)
@@ -170,7 +169,7 @@ fn plot_boarding(
         plot_platform_bounds!(chart, root, modifier);
 
         let drawing_area = chart.plotting_area();
-        let mapped = drawing_area.map_coordinate(&(stair, 0.0));
+        let mapped = drawing_area.map_coordinate(&(*stair, 0.0));
         let p: PathElement<(i32, i32)> = PathElement::new(
             [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
             lighter_stroke(),
@@ -195,7 +194,7 @@ fn plot_combined<T>(
     n_stairs: usize,
     roots: &[DrawingArea<BitMapBackend, Shift>],
     n_passengers_alighting: i64,
-    tokyo_train_passenger: &Vec<f64>,
+    tokyo_train_passenger: &[f64],
     kanda_combined: Vec<f64>,
     multiplier: f64,
     kanda: &[(f64, T, T, T)],

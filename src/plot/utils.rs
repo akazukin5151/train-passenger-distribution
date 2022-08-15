@@ -66,12 +66,12 @@ macro_rules! plot_platform_bounds {
     };
 }
 
-pub fn make_kde(multiplier: f64, tp: &Vec<f64>) -> Vec<(f64, f64)> {
+pub fn make_kde(multiplier: f64, tp: &[f64]) -> Vec<(f64, f64)> {
     (0..=100)
         .map(|num| {
             let x = num as f64;
             let bandwidth = scotts(tp.len() as f64) * multiplier;
-            let y = kernel_density_estimator(&tp, bandwidth, x);
+            let y = kernel_density_estimator(tp, bandwidth, x);
             (x, y)
         })
         .collect()
