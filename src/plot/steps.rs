@@ -39,10 +39,10 @@ fn plot_initial<T>(
 
     chart.draw_series(LineSeries::new(kde, BLUE.stroke_width(2)))?;
 
-    plot_platform_bounds(&chart, root, 0)?;
+    plot_platform_bounds(&chart, root, 0, 35)?;
 
     for (stair, _, _, _) in tokyo {
-        plot_stairs(root, &chart, *stair)?;
+        plot_stairs(root, &chart, *stair, 0, 35)?;
     }
     Ok(())
 }
@@ -72,7 +72,7 @@ fn plot_alighting(
         "Remaining",
     )?;
 
-    plot_platform_bounds(&chart, root, 30)?;
+    plot_platform_bounds(&chart, root, 210, 30)?;
     add_legend!(&mut chart);
     Ok(())
 }
@@ -102,10 +102,10 @@ fn plot_boarding(
                 .add_legend_icon(color);
         }
 
-        let modifier = 0;
-        plot_platform_bounds(&chart, root, modifier)?;
+        let modifier = (209 * i + 434) as i32;
+        plot_platform_bounds(&chart, root, modifier, 35)?;
 
-        plot_stairs(root, &chart, *stair)?;
+        plot_stairs(root, &chart, *stair, modifier, 35)?;
 
         if i == 0 {
             add_legend!(&mut chart);
@@ -133,11 +133,11 @@ fn plot_combined<T>(
 
     chart.draw_series(LineSeries::new(kde, BLUE.stroke_width(2)))?;
 
-    let modifier = 0;
-    plot_platform_bounds(&chart, root, modifier)?;
+    let modifier = (209 * 4 + 434) as i32;
+    plot_platform_bounds(&chart, root, modifier, 35)?;
 
     for (stair, _, _, _) in kanda {
-        plot_stairs(root, &chart, *stair)?;
+        plot_stairs(root, &chart, *stair, modifier, 35)?;
     }
     Ok(())
 }

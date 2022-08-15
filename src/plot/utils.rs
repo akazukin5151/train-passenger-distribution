@@ -60,21 +60,10 @@ pub fn plot_platform_bounds(
     chart: &Chart,
     root: &DrawingArea<BitMapBackend, Shift>,
     modifier: i32,
+    top_y: i32,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let drawing_area = chart.plotting_area();
-    let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
-    let p: PathElement<(i32, i32)> = PathElement::new(
-        [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-        black_stroke(),
-    );
-    root.draw(&p)?;
-
-    let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
-    let p: PathElement<(i32, i32)> = PathElement::new(
-        [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-        black_stroke(),
-    );
-    root.draw(&p)?;
+    plot_vline(root, chart, 0.0, modifier, top_y, black_stroke());
+    plot_vline(root, chart, 100.0, modifier, top_y, black_stroke());
     Ok(())
 }
 
@@ -82,12 +71,25 @@ pub fn plot_stairs(
     root: &DrawingArea<BitMapBackend, Shift>,
     chart: &Chart,
     stair: f64,
+    modifier: i32,
+    top_y: i32,
+) -> Result<(), Box<dyn std::error::Error>> {
+    plot_vline(root, chart, stair, modifier, top_y, lighter_stroke())
+}
+
+fn plot_vline(
+    root: &DrawingArea<BitMapBackend, Shift>,
+    chart: &Chart,
+    stair: f64,
+    modifier: i32,
+    top_y: i32,
+    stroke: ShapeStyle,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let drawing_area = chart.plotting_area();
     let mapped = drawing_area.map_coordinate(&(stair, 0.0));
     let p: PathElement<(i32, i32)> = PathElement::new(
-        [(mapped.0, 0), (mapped.0, mapped.1)],
-        lighter_stroke(),
+        [(mapped.0, mapped.1 - modifier), (mapped.0, top_y)],
+        stroke,
     );
     root.draw(&p)?;
     Ok(())
