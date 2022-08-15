@@ -18,41 +18,35 @@ fn combine_all(
     od_pairs: &Vec<OdRow>,
 ) -> Vec<Vec<f64>> {
     let tokyo = data[0].clone();
-    let tokyo_train_passenger = sum_boarding_types(&tokyo);
+    let tokyo_xs = sum_boarding_types(&tokyo);
 
     data.iter()
         .skip(1)
-        .fold(
-            (1, vec![tokyo_train_passenger]),
-            |(index, mut acc), kanda| {
-                let prev: &Vec<f64> = &acc[index - 1];
+        .fold((1, vec![tokyo_xs]), |(index, mut acc), boarding_data| {
+            let prev: &Vec<f64> = &acc[index - 1];
 
-                let n_passengers_alighting = get_n_alighting(
-                    index,
-                    all_station_stairs,
-                    od_pairs.clone(),
-                );
+            let n_passengers_alighting =
+                get_n_alighting(index, all_station_stairs, od_pairs.clone());
 
-                let n_passengers_remaining =
-                    prev.len() - (n_passengers_alighting as usize);
+            let n_passengers_remaining =
+                prev.len() - (n_passengers_alighting as usize);
 
-                dbg!(n_passengers_remaining);
+            dbg!(n_passengers_remaining);
 
-                let remaining_xs = prev.choose_multiple(
-                    &mut rand::thread_rng(),
-                    n_passengers_remaining,
-                );
+            let remaining_xs = prev.choose_multiple(
+                &mut rand::thread_rng(),
+                n_passengers_remaining,
+            );
 
-                let kanda_combined = sum_boarding_types(kanda);
+            let boarding_xs = sum_boarding_types(boarding_data);
 
-                let kanda: Vec<f64> =
-                    remaining_xs.cloned().chain(kanda_combined).collect();
+            let all_xs: Vec<f64> =
+                remaining_xs.cloned().chain(boarding_xs).collect();
 
-                acc.push(kanda);
+            acc.push(all_xs);
 
-                (index + 1, acc)
-            },
-        )
+            (index + 1, acc)
+        })
         .1
 }
 
