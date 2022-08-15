@@ -62,8 +62,8 @@ pub fn plot_platform_bounds(
     modifier: i32,
     top_y: i32,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    plot_vline(root, chart, 0.0, modifier, top_y, black_stroke());
-    plot_vline(root, chart, 100.0, modifier, top_y, black_stroke());
+    plot_vline(root, chart, 0.0, modifier, top_y, black_stroke())?;
+    plot_vline(root, chart, 100.0, modifier, top_y, black_stroke())?;
     Ok(())
 }
 
