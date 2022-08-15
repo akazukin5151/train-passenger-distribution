@@ -1,4 +1,3 @@
-use crate::make_cumulative;
 use crate::plot::utils::*;
 use crate::types::*;
 use crate::COLORS;
@@ -254,7 +253,7 @@ fn plot_combined<T>(
 }
 
 pub fn plot_step_by_step(
-    stations: &Vec<&str>,
+    n_passengers_alighting: i64,
     result: &[Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>],
     filename: &'static str,
     multiplier: f64,
@@ -284,7 +283,6 @@ pub fn plot_step_by_step(
     // alighting
     // note that this is not recursive, so for the 3rd station,
     // need to call for 2nd station first
-    let n_passengers_alighting = make_cumulative(1, stations.to_vec());
     plot_alighting(&roots, n_passengers_alighting, &tokyo_train_passenger)?;
 
     // boarding

@@ -141,10 +141,8 @@ fn stairs_to_uniform(n_uniform: f64) -> Vec<f64> {
         .collect()
 }
 
-pub fn generate_boarding_distributions(
-    stations: Vec<&str>,
-) -> Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>> {
-    let all_station_stairs: Vec<StationStairs> = stations
+pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {
+    stations
         .iter()
         .map(|station| StationStairs {
             station_name: station.to_string(),
@@ -154,8 +152,12 @@ pub fn generate_boarding_distributions(
             ))
             .unwrap(),
         })
-        .collect();
+        .collect()
+}
 
+pub fn generate_boarding_distributions(
+    all_station_stairs: &[StationStairs],
+) -> Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>> {
     let n_people = 200;
     let prop_normal_far = 0.6;
     let prop_uniform = 0.1;
@@ -192,19 +194,11 @@ pub fn generate_boarding_distributions(
         .collect()
 }
 
-pub fn make_cumulative(index: usize, stations: Vec<&str>) -> i64 {
-    let all_station_stairs: Vec<StationStairs> = stations
-        .iter()
-        .map(|station| StationStairs {
-            station_name: station.to_string(),
-            stair_locations: read_stair_locations(format!(
-                "maps/{}.svg",
-                station
-            ))
-            .unwrap(),
-        })
-        .collect();
-    let od_pairs = read_od_row();
+pub fn make_cumulative(
+    index: usize,
+    all_station_stairs: Vec<StationStairs>,
+    od_pairs: Vec<OdRow>,
+) -> i64 {
     //let mut new_tp = train_passengers.clone();
     //if index > 1 {
     //    new_tp[index - 1] = make_cumulative(
