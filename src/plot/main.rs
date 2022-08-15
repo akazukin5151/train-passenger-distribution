@@ -79,7 +79,7 @@ pub fn plot_kde_together(
                 Rectangle::new([(x, y - 6), (x + 12, y + 6)], color.filled())
             });
 
-        plot_platform_bounds!(chart, root, 0);
+        plot_platform_bounds(&chart, &root, 0)?;
     }
 
     chart

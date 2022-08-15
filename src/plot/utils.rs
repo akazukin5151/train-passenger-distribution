@@ -1,5 +1,7 @@
 use crate::kde::*;
 use crate::types::*;
+use plotters::coord::types::RangedCoordf64;
+use plotters::coord::Shift;
 use plotters::prelude::*;
 
 // This is a macro to avoid lifetime issues (ChartContext has a generic lifetime)
@@ -46,24 +48,29 @@ pub fn lighter_stroke() -> ShapeStyle {
     }
 }
 
-// This is a macro to avoid lifetime issues from CT due to root
-macro_rules! plot_platform_bounds {
-    ($chart:ident, $root:ident, $modifier:expr) => {
-        let drawing_area = $chart.plotting_area();
-        let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - $modifier)],
-            black_stroke(),
-        );
-        $root.draw(&p).unwrap();
+pub fn plot_platform_bounds(
+    chart: &ChartContext<
+        BitMapBackend,
+        Cartesian2d<RangedCoordf64, RangedCoordf64>,
+    >,
+    root: &DrawingArea<BitMapBackend, Shift>,
+    modifier: i32,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let drawing_area = chart.plotting_area();
+    let mapped = drawing_area.map_coordinate(&(0.0, 0.0));
+    let p: PathElement<(i32, i32)> = PathElement::new(
+        [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+        black_stroke(),
+    );
+    root.draw(&p)?;
 
-        let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - $modifier)],
-            black_stroke(),
-        );
-        $root.draw(&p)?;
-    };
+    let mapped = drawing_area.map_coordinate(&(100.0, 0.0));
+    let p: PathElement<(i32, i32)> = PathElement::new(
+        [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
+        black_stroke(),
+    );
+    root.draw(&p)?;
+    Ok(())
 }
 
 pub fn make_kde(multiplier: f64, tp: &[f64]) -> Vec<(f64, f64)> {

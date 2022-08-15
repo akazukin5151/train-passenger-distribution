@@ -35,7 +35,7 @@ macro_rules! abstract_plot {
             $make_data(i, &mut chart);
 
             let modifier = 190 * i as i32;
-            plot_platform_bounds!(chart, root, modifier);
+            plot_platform_bounds(&chart, root, modifier)?;
 
             let drawing_area = chart.plotting_area();
             let stair_locations = &$all_station_stairs[i].stair_locations;

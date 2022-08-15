@@ -43,7 +43,7 @@ fn plot_initial<T>(
     let kde = make_kde(multiplier, tokyo_train_passenger);
     chart.draw_series(LineSeries::new(kde, BLUE.stroke_width(2)))?;
 
-    plot_platform_bounds!(chart, root, 0);
+    plot_platform_bounds(&chart, root, 0)?;
 
     for (stair, _, _, _) in tokyo {
         let drawing_area = chart.plotting_area();
@@ -115,7 +115,7 @@ fn plot_alighting(
             Rectangle::new([(x, y - 6), (x + 12, y + 6)], GRAY.filled())
         });
 
-    plot_platform_bounds!(chart, root, 30);
+    plot_platform_bounds(&chart, root, 30)?;
     chart
         .configure_series_labels()
         .position(SeriesLabelPosition::UpperRight)
@@ -166,7 +166,7 @@ fn plot_boarding(
         }
 
         let modifier = 0;
-        plot_platform_bounds!(chart, root, modifier);
+        plot_platform_bounds(&chart, root, modifier)?;
 
         let drawing_area = chart.plotting_area();
         let mapped = drawing_area.map_coordinate(&(*stair, 0.0));
@@ -227,7 +227,7 @@ fn plot_combined<T>(
     chart.draw_series(LineSeries::new(kde, BLUE.stroke_width(2)))?;
 
     let modifier = 0;
-    plot_platform_bounds!(chart, root, modifier);
+    plot_platform_bounds(&chart, root, modifier)?;
 
     for (stair, _, _, _) in kanda {
         let drawing_area = chart.plotting_area();
