@@ -11,14 +11,14 @@ use rand_distr::Uniform;
 fn sum_boarding_types<T>(
     boarding: &[(T, Vec<f64>, Vec<f64>, Vec<f64>)],
 ) -> Vec<f64> {
-    boarding.iter().fold(vec![], |acc, (_, far, close, uni)| {
-        let mut xs = vec![];
-        xs.extend(acc);
-        xs.extend(far);
-        xs.extend(close);
-        xs.extend(uni);
-        xs
-    })
+    boarding
+        .iter()
+        .fold(vec![], |mut acc, (_, far, close, uni)| {
+            acc.extend(far);
+            acc.extend(close);
+            acc.extend(uni);
+            acc
+        })
 }
 
 fn plot_initial<T>(
