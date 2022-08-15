@@ -9,7 +9,7 @@ use plot::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let stations = vec!["東京", "神田", "御茶ノ水", "四ッ谷"];
-    let data = test(stations.clone());
+    let data = generate_boarding_distributions(stations.clone());
     //let data = generate_passenger_locations(stations);
     //plot_kde_separate(&data, 12.0)?.present()?;
     //plot_strip(&data)?.present()?;

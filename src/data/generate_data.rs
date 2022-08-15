@@ -141,7 +141,7 @@ fn stairs_to_uniform(n_uniform: f64) -> Vec<f64> {
         .collect()
 }
 
-pub fn test(
+pub fn generate_boarding_distributions(
     stations: Vec<&str>,
 ) -> Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>> {
     let all_station_stairs: Vec<StationStairs> = stations
@@ -192,11 +192,7 @@ pub fn test(
         .collect()
 }
 
-pub fn make_cumulative<'a>(
-    index: usize,
-    stations: Vec<&str>,
-    train_passengers: &Vec<&'a PassengerLocations>,
-) -> i64 {
+pub fn make_cumulative(index: usize, stations: Vec<&str>) -> i64 {
     let all_station_stairs: Vec<StationStairs> = stations
         .iter()
         .map(|station| StationStairs {
@@ -219,8 +215,6 @@ pub fn make_cumulative<'a>(
     //    );
     //}
     let this_station_stairs = &all_station_stairs[index];
-    let prev_row = train_passengers[index - 1];
-    let prev_xs = &prev_row.passenger_locations;
     let previous_stations: Vec<_> = all_station_stairs
         .iter()
         .map(|x| x.station_name.clone())
@@ -238,13 +232,4 @@ pub fn make_cumulative<'a>(
     });
     dbg!(n_passengers_alighting);
     n_passengers_alighting
-    //let n_passengers_in_train = prev_xs.len() + n_passengers_alighting as usize;
-    //let passengers_alighting = prev_xs
-    //    .choose_multiple(
-    //        &mut rand::thread_rng(),
-    //        n_passengers_alighting.try_into().unwrap(),
-    //    )
-    //    .collect();
-
-    //passengers_alighting
 }
