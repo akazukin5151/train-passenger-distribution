@@ -44,7 +44,7 @@ macro_rules! abstract_plot {
                     drawing_area.map_coordinate(&(*stair_location as f64, 0.0));
                 let p: PathElement<(i32, i32)> = PathElement::new(
                     [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-                    lighter_stroke(),
+                    crate::plot::colors::lighter_stroke(),
                 );
                 root.draw(&p)?;
             }

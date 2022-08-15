@@ -14,3 +14,15 @@ pub fn kernel_density_estimator(xs: &[f64], bandwidth: f64, x: f64) -> f64 {
     let summed: f64 = xs.iter().map(|xi| gaussian((x - xi) / bandwidth)).sum();
     (1.0 / (n * bandwidth)) * summed
 }
+
+pub fn make_kde(multiplier: f64, tp: &[f64]) -> Vec<(f64, f64)> {
+    (0..=100)
+        .map(|num| {
+            let x = num as f64;
+            let bandwidth = scotts(tp.len() as f64) * multiplier;
+            let y = kernel_density_estimator(tp, bandwidth, x);
+            (x, y)
+        })
+        .collect()
+}
+

@@ -1,3 +1,5 @@
+use crate::kde::make_kde;
+use crate::plot::colors::*;
 use crate::plot::utils::*;
 use crate::COLORS;
 use plotters::coord::Shift;

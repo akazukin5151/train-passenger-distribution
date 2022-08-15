@@ -1,4 +1,4 @@
-use crate::kde::*;
+use crate::plot::colors::*;
 use plotters::chart::SeriesAnno;
 use plotters::coord::types::RangedCoordf64;
 use plotters::coord::Shift;
@@ -56,24 +56,6 @@ macro_rules! add_legend {
     }};
 }
 
-pub const GRAY: RGBColor = RGBColor(100, 100, 100);
-
-pub fn black_stroke() -> ShapeStyle {
-    ShapeStyle {
-        color: RGBAColor(0, 0, 0, 1.0),
-        filled: true,
-        stroke_width: 1,
-    }
-}
-
-pub fn lighter_stroke() -> ShapeStyle {
-    ShapeStyle {
-        color: GREEN.mix(1.0),
-        filled: true,
-        stroke_width: 1,
-    }
-}
-
 pub fn plot_platform_bounds(
     chart: &Chart,
     root: &DrawingArea<BitMapBackend, Shift>,
@@ -94,17 +76,6 @@ pub fn plot_platform_bounds(
     );
     root.draw(&p)?;
     Ok(())
-}
-
-pub fn make_kde(multiplier: f64, tp: &[f64]) -> Vec<(f64, f64)> {
-    (0..=100)
-        .map(|num| {
-            let x = num as f64;
-            let bandwidth = scotts(tp.len() as f64) * multiplier;
-            let y = kernel_density_estimator(tp, bandwidth, x);
-            (x, y)
-        })
-        .collect()
 }
 
 pub fn plot_stairs(
