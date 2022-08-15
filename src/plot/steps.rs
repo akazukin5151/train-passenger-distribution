@@ -6,7 +6,9 @@ use plotters::drawing::DrawingArea;
 use plotters::prelude::*;
 use rand::prelude::IteratorRandom;
 use rand::prelude::SliceRandom;
+use rand::rngs::ThreadRng;
 use rand::Rng;
+use rand_distr::DistIter;
 use rand_distr::Uniform;
 
 fn sum_boarding_types<T>(
@@ -34,6 +36,24 @@ fn plot_stairs(
         lighter_stroke(),
     );
     root.draw(&p)?;
+    Ok(())
+}
+
+fn plot_points(
+    chart: &mut Chart,
+    xs: &mut dyn Iterator<Item = &f64>,
+    ys: DistIter<Uniform<f64>, ThreadRng, f64>,
+    color: RGBColor,
+    label: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    chart
+        .draw_series(
+            xs.zip(ys)
+                .map(|(x, y)| Circle::new((*x, y), 2_i32, color.filled()))
+                .choose_multiple(&mut rand::thread_rng(), 200),
+        )?
+        .label(label)
+        .add_legend_icon(color);
     Ok(())
 }
 
@@ -89,7 +109,7 @@ fn plot_alighting(
     let uniform = Uniform::new(0.0, 1.0_f64);
     let alight_ys = rand::thread_rng().sample_iter(uniform);
 
-    let remaining_xs = tokyo_train_passenger
+    let mut remaining_xs = tokyo_train_passenger
         .iter()
         .filter(|x| alight_xs.contains(x));
 
@@ -101,27 +121,20 @@ fn plot_alighting(
     root.titled("Passengers alighting at Kanda", ("sans-serif", 30))?;
     let mut chart = chart_with_mesh!(root, 0.0..1.0_f64);
 
-    chart
-        .draw_series(
-            alight_xs
-                .iter()
-                .zip(alight_ys)
-                .map(|(x, y)| Circle::new((**x, y), 2_i32, RED.filled()))
-                .choose_multiple(&mut rand::thread_rng(), 200),
-        )?
-        .label("Alighting")
-        .add_legend_icon(RED);
-
-    chart
-        .draw_series(
-            remaining_xs
-                .clone()
-                .zip(remaining_ys)
-                .map(|(x, y)| Circle::new((*x, y), 2_i32, GRAY.filled()))
-                .choose_multiple(&mut rand::thread_rng(), 200),
-        )?
-        .label("Remaining")
-        .add_legend_icon(GRAY);
+    plot_points(
+        &mut chart,
+        &mut alight_xs.iter().cloned(),
+        alight_ys,
+        RED,
+        "Alighting",
+    )?;
+    plot_points(
+        &mut chart,
+        &mut remaining_xs,
+        remaining_ys,
+        GRAY,
+        "Remaining",
+    )?;
 
     plot_platform_bounds(&chart, root, 30)?;
     add_legend!(&mut chart);
