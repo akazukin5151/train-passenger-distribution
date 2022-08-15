@@ -30,7 +30,7 @@ pub fn plot_kde_separate(
         "out/out.png",
         0.0..0.06,
         all_station_stairs,
-        |i, chart: &mut Chart!()| {
+        |i, chart: &mut Chart| {
             for (idx, kde) in kdes.clone().enumerate() {
                 let color = if i == idx {
                     let c: RGBColor = COLORS[i];
@@ -107,7 +107,7 @@ pub fn plot_strip(
         "out/strip.png",
         0.0..1.0,
         all_station_stairs,
-        |i, chart: &mut Chart!()| {
+        |i, chart: &mut Chart| {
             let xs: &Vec<f64> = &train_passengers[i];
             let uniform = Uniform::new(0.0, 1.0_f64);
             let ys = rand::thread_rng().sample_iter(uniform).take(xs.len());

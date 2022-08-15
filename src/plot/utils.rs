@@ -1,21 +1,13 @@
 use crate::kde::*;
-use crate::types::*;
 use plotters::coord::types::RangedCoordf64;
 use plotters::coord::Shift;
 use plotters::prelude::*;
 
-// This is a macro to avoid lifetime issues (ChartContext has a generic lifetime)
-macro_rules! Chart {
-    () => {
-        ChartContext<
-            BitMapBackend,
-            Cartesian2d<
-                plotters::coord::types::RangedCoordf64,
-                plotters::coord::types::RangedCoordf64
-            >,
-        >
-    }
-}
+pub type Chart<'a, 'b> = ChartContext<
+    'a,
+    BitMapBackend<'b>,
+    Cartesian2d<RangedCoordf64, RangedCoordf64>,
+>;
 
 // This is a macro to avoid lifetime issues from CT due to root
 macro_rules! basic_chart {
@@ -49,10 +41,7 @@ pub fn lighter_stroke() -> ShapeStyle {
 }
 
 pub fn plot_platform_bounds(
-    chart: &ChartContext<
-        BitMapBackend,
-        Cartesian2d<RangedCoordf64, RangedCoordf64>,
-    >,
+    chart: &Chart,
     root: &DrawingArea<BitMapBackend, Shift>,
     modifier: i32,
 ) -> Result<(), Box<dyn std::error::Error>> {
