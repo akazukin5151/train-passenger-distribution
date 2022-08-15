@@ -136,7 +136,7 @@ pub fn plot_step_by_step(
     filename: &'static str,
     multiplier: f64,
 ) -> Result<
-    DrawingArea<BitMapBackend<'static>, Shift>,
+    (DrawingArea<BitMapBackend<'static>, Shift>, Vec<f64>),
     Box<dyn std::error::Error>,
 > {
     let root = BitMapBackend::new(filename, (1024, 1500)).into_drawing_area();
@@ -178,13 +178,8 @@ pub fn plot_step_by_step(
 
     // combined
     let kanda_combined = sum_boarding_types(&kanda);
-    plot_combined(
-        remaining_xs.cloned().chain(kanda_combined).collect(),
-        n_stairs,
-        &roots,
-        multiplier,
-        &kanda,
-    )?;
+    let xs: Vec<_> = remaining_xs.cloned().chain(kanda_combined).collect();
+    plot_combined(xs.clone(), n_stairs, &roots, multiplier, &kanda)?;
 
-    Ok(root.clone())
+    Ok((root.clone(), xs))
 }

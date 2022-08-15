@@ -62,7 +62,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = generate_boarding_distributions(&all_station_stairs);
     let od_pairs = read_od_row();
 
-    let tp = combine_all(&data, &all_station_stairs, &od_pairs);
+    let n_passengers_alighting =
+        get_n_alighting(1, &all_station_stairs, od_pairs.clone());
+
+    let (r, kanda_tp) = plot_step_by_step(
+        n_passengers_alighting,
+        &data,
+        "out/step-by-step.png",
+        12.0,
+    )?;
+    r.present()?;
+
+    let mut tp = combine_all(&data, &all_station_stairs, &od_pairs);
+    // the tokyo distribution is apparently the same
+    tp[1] = kanda_tp;
 
     plot_kde_separate(&all_station_stairs, &tp, 12.0)?.present()?;
     plot_strip(&all_station_stairs, &tp)?.present()?;
@@ -71,14 +84,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     plot_kde_together(&all_station_stairs, &tp, "out/smoothed.png", 25.0)?
         .present()?;
 
-    let n_passengers_alighting =
-        get_n_alighting(1, &all_station_stairs, od_pairs);
-    plot_step_by_step(
-        n_passengers_alighting,
-        &data,
-        "out/step-by-step.png",
-        12.0,
-    )?
-    .present()?;
     Ok(())
 }
