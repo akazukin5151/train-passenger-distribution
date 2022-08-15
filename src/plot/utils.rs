@@ -22,6 +22,35 @@ macro_rules! basic_chart {
     };
 }
 
+// macro used to avoid lifetime errors
+macro_rules! chart_with_mesh {
+    ($root: expr, $y_range: expr) => {{
+        let mut chart = basic_chart!($root)
+            .margin_top(30_i32)
+            .build_cartesian_2d(-10.0..110.0_f64, $y_range)?;
+
+        chart
+            .configure_mesh()
+            .axis_desc_style(("sans-serif", 20_i32).into_text_style($root))
+            .light_line_style(&WHITE)
+            .draw()?;
+        chart
+    }};
+}
+
+macro_rules! add_legend {
+    ($chart: expr) => {{
+        $chart
+            .configure_series_labels()
+            .position(SeriesLabelPosition::UpperRight)
+            .background_style(WHITE.filled())
+            .border_style(&BLACK.mix(0.5))
+            .legend_area_size(22_i32)
+            .label_font(("sans-serif", 20_i32))
+            .draw()?;
+    }};
+}
+
 pub const GRAY: RGBColor = RGBColor(100, 100, 100);
 
 pub fn black_stroke() -> ShapeStyle {

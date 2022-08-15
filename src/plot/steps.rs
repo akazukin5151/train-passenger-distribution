@@ -1,5 +1,6 @@
 use crate::plot::utils::*;
 use crate::COLORS;
+use plotters::chart::SeriesAnno;
 use plotters::coord::Shift;
 use plotters::drawing::DrawingArea;
 use plotters::prelude::*;
@@ -21,38 +22,54 @@ fn sum_boarding_types<T>(
         })
 }
 
+fn plot_stairs(
+    root: &DrawingArea<BitMapBackend, Shift>,
+    chart: &Chart,
+    stair: f64,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let drawing_area = chart.plotting_area();
+    let mapped = drawing_area.map_coordinate(&(stair, 0.0));
+    let p: PathElement<(i32, i32)> = PathElement::new(
+        [(mapped.0, 0), (mapped.0, mapped.1)],
+        lighter_stroke(),
+    );
+    root.draw(&p)?;
+    Ok(())
+}
+
+trait Ext {
+    fn add_legend_icon(&mut self, color: RGBColor);
+}
+
+impl Ext for SeriesAnno<'_, BitMapBackend<'_>> {
+    fn add_legend_icon(&mut self, color: RGBColor) {
+        self.legend(move |(x, y)| {
+            Rectangle::new([(x, y - 6), (x + 12, y + 6)], color.filled())
+        });
+    }
+}
+
 fn plot_initial<T>(
     roots: &[DrawingArea<BitMapBackend, Shift>],
     tokyo_train_passenger: &[f64],
     multiplier: f64,
     tokyo: &[(f64, T, T, T)],
 ) -> Result<(), Box<dyn std::error::Error>> {
+    // data
+    let kde = make_kde(multiplier, tokyo_train_passenger);
+
+    // plot
     let i = 0;
     let root = &roots[i];
     root.titled("Initial distribution from Tokyo", ("sans-serif", 30))?;
-    let mut chart = basic_chart!(root)
-        .margin_top(30_i32)
-        .build_cartesian_2d(-10.0..110.0_f64, 0.0..0.06_f64)?;
+    let mut chart = chart_with_mesh!(root, 0.0..0.06_f64);
 
-    chart
-        .configure_mesh()
-        .axis_desc_style(("sans-serif", 20_i32).into_text_style(root))
-        .light_line_style(&WHITE)
-        .draw()?;
-
-    let kde = make_kde(multiplier, tokyo_train_passenger);
     chart.draw_series(LineSeries::new(kde, BLUE.stroke_width(2)))?;
 
     plot_platform_bounds(&chart, root, 0)?;
 
     for (stair, _, _, _) in tokyo {
-        let drawing_area = chart.plotting_area();
-        let mapped = drawing_area.map_coordinate(&(*stair, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1)],
-            lighter_stroke(),
-        );
-        root.draw(&p)?;
+        plot_stairs(root, &chart, *stair)?;
     }
     Ok(())
 }
@@ -62,19 +79,7 @@ fn plot_alighting(
     n_passengers_alighting: i64,
     tokyo_train_passenger: &[f64],
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let i = 1;
-    let root = &roots[i];
-    root.titled("Passengers alighting at Kanda", ("sans-serif", 30))?;
-    let mut chart = basic_chart!(root)
-        .margin_top(30_i32)
-        .build_cartesian_2d(-10.0..110.0_f64, 0.0..1.0_f64)?;
-
-    chart
-        .configure_mesh()
-        .axis_desc_style(("sans-serif", 20_i32).into_text_style(root))
-        .light_line_style(&WHITE)
-        .draw()?;
-
+    // data
     let alight_xs: Vec<_> = tokyo_train_passenger
         .choose_multiple(
             &mut rand::thread_rng(),
@@ -83,6 +88,18 @@ fn plot_alighting(
         .collect();
     let uniform = Uniform::new(0.0, 1.0_f64);
     let alight_ys = rand::thread_rng().sample_iter(uniform);
+
+    let remaining_xs = tokyo_train_passenger
+        .iter()
+        .filter(|x| alight_xs.contains(x));
+
+    let remaining_ys = rand::thread_rng().sample_iter(uniform);
+
+    // plot
+    let i = 1;
+    let root = &roots[i];
+    root.titled("Passengers alighting at Kanda", ("sans-serif", 30))?;
+    let mut chart = chart_with_mesh!(root, 0.0..1.0_f64);
 
     chart
         .draw_series(
@@ -93,15 +110,7 @@ fn plot_alighting(
                 .choose_multiple(&mut rand::thread_rng(), 200),
         )?
         .label("Alighting")
-        .legend(move |(x, y)| {
-            Rectangle::new([(x, y - 6), (x + 12, y + 6)], RED.filled())
-        });
-
-    let remaining_xs = tokyo_train_passenger
-        .iter()
-        .filter(|x| alight_xs.contains(x));
-
-    let remaining_ys = rand::thread_rng().sample_iter(uniform);
+        .add_legend_icon(RED);
 
     chart
         .draw_series(
@@ -111,19 +120,10 @@ fn plot_alighting(
                 .choose_multiple(&mut rand::thread_rng(), 200),
         )?
         .label("Remaining")
-        .legend(move |(x, y)| {
-            Rectangle::new([(x, y - 6), (x + 12, y + 6)], GRAY.filled())
-        });
+        .add_legend_icon(GRAY);
 
     plot_platform_bounds(&chart, root, 30)?;
-    chart
-        .configure_series_labels()
-        .position(SeriesLabelPosition::UpperRight)
-        .background_style(WHITE.filled())
-        .border_style(&BLACK.mix(0.5))
-        .legend_area_size(22_i32)
-        .label_font(("sans-serif", 20_i32))
-        .draw()?;
+    add_legend!(&mut chart);
     Ok(())
 }
 
@@ -139,15 +139,7 @@ fn plot_boarding(
             &format!("Passengers boarding at Kanda stair #{}", i + 1),
             ("sans-serif", 30),
         )?;
-        let mut chart = basic_chart!(root)
-            .margin_top(30_i32)
-            .build_cartesian_2d(-10.0..110.0_f64, 0.0..0.15_f64)?;
-
-        chart
-            .configure_mesh()
-            .axis_desc_style(("sans-serif", 20_i32).into_text_style(root))
-            .light_line_style(&WHITE)
-            .draw()?;
+        let mut chart = chart_with_mesh!(root, 0.0..0.15_f64);
 
         let labels = ["beta far", "beta close", "uniform"];
         for ((xs, label), color) in
@@ -157,34 +149,16 @@ fn plot_boarding(
             chart
                 .draw_series(LineSeries::new(kde, color.stroke_width(2)))?
                 .label(label)
-                .legend(move |(x, y)| {
-                    Rectangle::new(
-                        [(x, y - 6), (x + 12, y + 6)],
-                        color.filled(),
-                    )
-                });
+                .add_legend_icon(color);
         }
 
         let modifier = 0;
         plot_platform_bounds(&chart, root, modifier)?;
 
-        let drawing_area = chart.plotting_area();
-        let mapped = drawing_area.map_coordinate(&(*stair, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-            lighter_stroke(),
-        );
-        root.draw(&p)?;
+        plot_stairs(root, &chart, *stair)?;
 
         if i == 0 {
-            chart
-                .configure_series_labels()
-                .position(SeriesLabelPosition::UpperRight)
-                .background_style(WHITE.filled())
-                .border_style(&BLACK.mix(0.5))
-                .legend_area_size(22_i32)
-                .label_font(("sans-serif", 20_i32))
-                .draw()?;
+            add_legend!(&mut chart);
         }
     }
     Ok(())
@@ -199,20 +173,7 @@ fn plot_combined<T>(
     multiplier: f64,
     kanda: &[(f64, T, T, T)],
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let i = n_stairs + 2;
-    let root = &roots[i];
-    root.titled("Net distribution after Kanda", ("sans-serif", 30))?;
-    let mut chart = basic_chart!(root)
-        .margin_top(30_i32)
-        .build_cartesian_2d(-10.0..110.0_f64, 0.0..0.06_f64)?;
-
-    chart
-        .configure_mesh()
-        .x_desc("xpos")
-        .axis_desc_style(("sans-serif", 20_i32).into_text_style(root))
-        .light_line_style(&WHITE)
-        .draw()?;
-
+    // data
     let xs: Vec<_> = tokyo_train_passenger
         .choose_multiple(
             &mut rand::thread_rng(),
@@ -224,19 +185,21 @@ fn plot_combined<T>(
         .chain(kanda_combined)
         .collect();
     let kde = make_kde(multiplier, &xs);
+
+    // plot
+    let i = n_stairs + 2;
+    let root = &roots[i];
+    root.titled("Net distribution after Kanda", ("sans-serif", 30))?;
+
+    let mut chart = chart_with_mesh!(root, 0.0..0.06_f64);
+
     chart.draw_series(LineSeries::new(kde, BLUE.stroke_width(2)))?;
 
     let modifier = 0;
     plot_platform_bounds(&chart, root, modifier)?;
 
     for (stair, _, _, _) in kanda {
-        let drawing_area = chart.plotting_area();
-        let mapped = drawing_area.map_coordinate(&(*stair, 0.0));
-        let p: PathElement<(i32, i32)> = PathElement::new(
-            [(mapped.0, 0), (mapped.0, mapped.1 - modifier)],
-            lighter_stroke(),
-        );
-        root.draw(&p)?;
+        plot_stairs(root, &chart, *stair)?;
     }
     Ok(())
 }
