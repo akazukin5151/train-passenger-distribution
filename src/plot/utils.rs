@@ -1,7 +1,12 @@
 use crate::kde::*;
+use plotters::chart::SeriesAnno;
 use plotters::coord::types::RangedCoordf64;
 use plotters::coord::Shift;
 use plotters::prelude::*;
+use rand::distributions::Uniform;
+use rand::prelude::IteratorRandom;
+use rand::rngs::ThreadRng;
+use rand_distr::DistIter;
 
 pub type Chart<'a, 'b> = ChartContext<
     'a,
@@ -100,4 +105,49 @@ pub fn make_kde(multiplier: f64, tp: &[f64]) -> Vec<(f64, f64)> {
             (x, y)
         })
         .collect()
+}
+
+pub fn plot_stairs(
+    root: &DrawingArea<BitMapBackend, Shift>,
+    chart: &Chart,
+    stair: f64,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let drawing_area = chart.plotting_area();
+    let mapped = drawing_area.map_coordinate(&(stair, 0.0));
+    let p: PathElement<(i32, i32)> = PathElement::new(
+        [(mapped.0, 0), (mapped.0, mapped.1)],
+        lighter_stroke(),
+    );
+    root.draw(&p)?;
+    Ok(())
+}
+
+pub fn plot_points(
+    chart: &mut Chart,
+    xs: &mut dyn Iterator<Item = &f64>,
+    ys: DistIter<Uniform<f64>, ThreadRng, f64>,
+    color: RGBColor,
+    label: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    chart
+        .draw_series(
+            xs.zip(ys)
+                .map(|(x, y)| Circle::new((*x, y), 2_i32, color.filled()))
+                .choose_multiple(&mut rand::thread_rng(), 200),
+        )?
+        .label(label)
+        .add_legend_icon(color);
+    Ok(())
+}
+
+pub trait Ext {
+    fn add_legend_icon(&mut self, color: RGBColor);
+}
+
+impl Ext for SeriesAnno<'_, BitMapBackend<'_>> {
+    fn add_legend_icon(&mut self, color: RGBColor) {
+        self.legend(move |(x, y)| {
+            Rectangle::new([(x, y - 6), (x + 12, y + 6)], color.filled())
+        });
+    }
 }

@@ -1,15 +1,11 @@
 use crate::plot::utils::*;
 use crate::COLORS;
-use plotters::chart::SeriesAnno;
 use plotters::coord::Shift;
 use plotters::drawing::DrawingArea;
 use plotters::prelude::*;
-use rand::prelude::IteratorRandom;
+use rand::distributions::Uniform;
 use rand::prelude::SliceRandom;
-use rand::rngs::ThreadRng;
 use rand::Rng;
-use rand_distr::DistIter;
-use rand_distr::Uniform;
 
 fn sum_boarding_types<T>(
     boarding: &[(T, Vec<f64>, Vec<f64>, Vec<f64>)],
@@ -22,51 +18,6 @@ fn sum_boarding_types<T>(
             acc.extend(uni);
             acc
         })
-}
-
-fn plot_stairs(
-    root: &DrawingArea<BitMapBackend, Shift>,
-    chart: &Chart,
-    stair: f64,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let drawing_area = chart.plotting_area();
-    let mapped = drawing_area.map_coordinate(&(stair, 0.0));
-    let p: PathElement<(i32, i32)> = PathElement::new(
-        [(mapped.0, 0), (mapped.0, mapped.1)],
-        lighter_stroke(),
-    );
-    root.draw(&p)?;
-    Ok(())
-}
-
-fn plot_points(
-    chart: &mut Chart,
-    xs: &mut dyn Iterator<Item = &f64>,
-    ys: DistIter<Uniform<f64>, ThreadRng, f64>,
-    color: RGBColor,
-    label: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
-    chart
-        .draw_series(
-            xs.zip(ys)
-                .map(|(x, y)| Circle::new((*x, y), 2_i32, color.filled()))
-                .choose_multiple(&mut rand::thread_rng(), 200),
-        )?
-        .label(label)
-        .add_legend_icon(color);
-    Ok(())
-}
-
-trait Ext {
-    fn add_legend_icon(&mut self, color: RGBColor);
-}
-
-impl Ext for SeriesAnno<'_, BitMapBackend<'_>> {
-    fn add_legend_icon(&mut self, color: RGBColor) {
-        self.legend(move |(x, y)| {
-            Rectangle::new([(x, y - 6), (x + 12, y + 6)], color.filled())
-        });
-    }
 }
 
 fn plot_initial<T>(
