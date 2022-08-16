@@ -6,7 +6,9 @@ Simulates the distribution of passengers inside a train along its journey. Highe
 
 It assumes that the biggest/only factor in the spatial distribution of passengers is the location of "stairs" (stairs and escalators) on station platforms.
 
-A random beta distribution is generated for every "stair" location, plus a smaller random uniform distribution. This is added up for every station cumulatively. Origin-destination data is used to model passengers alighting the train cumulatively.
+![step-by-step](examples/step-by-step.png)
+
+Two random beta distributions are generated for every "stair" location, one with a larger and the other a smaller variance. A smaller random uniform distribution is also generated. The three are added up for every stair in every station cumulatively. Origin-destination data is used to model passengers alighting the train cumulatively.
 
 The beta distribution is used because it is more appropriate to model proportions (which is bounded between 0-1 exclusive). For values exactly at 0 and 1, it turns it into 0.01 and 0.99 for the beta distribution. The normal distribution would cause edge effects on the boundaries because values outside the boundary was clamped. The alternative was to ignore those values, but that would decrease the number of passengers generated.
 
