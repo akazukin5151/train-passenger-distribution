@@ -78,7 +78,7 @@ pub fn generate_boarding_distributions(
 pub fn get_n_alighting(
     index: usize,
     all_station_stairs: &[StationStairs],
-    od_pairs: Vec<OdRow>,
+    od_pairs: &[OdRow],
 ) -> i64 {
     let this_station_stairs = &all_station_stairs[index];
     let previous_stations: Vec<_> = all_station_stairs

@@ -13,20 +13,21 @@ use rand::prelude::SliceRandom;
 use utils::*;
 
 fn combine_all(
-    data: &Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>>,
-    all_station_stairs: &Vec<StationStairs>,
-    od_pairs: &Vec<OdRow>,
+    all_boarding_data: &Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>>,
+    all_station_stairs: &[StationStairs],
+    od_pairs: &[OdRow],
 ) -> Vec<Vec<f64>> {
-    let tokyo = data[0].clone();
-    let tokyo_xs = sum_boarding_types(&tokyo);
+    let tokyo = &all_boarding_data[0];
+    let tokyo_xs = sum_boarding_types(tokyo);
 
-    data.iter()
+    all_boarding_data
+        .iter()
         .skip(1)
         .fold((1, vec![tokyo_xs]), |(index, mut acc), boarding_data| {
             let prev: &Vec<f64> = &acc[index - 1];
 
             let n_passengers_alighting =
-                get_n_alighting(index, all_station_stairs, od_pairs.clone());
+                get_n_alighting(index, all_station_stairs, od_pairs);
 
             let n_passengers_remaining =
                 prev.len() - (n_passengers_alighting as usize);
@@ -57,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let od_pairs = read_od_row();
 
     let n_passengers_alighting =
-        get_n_alighting(1, &all_station_stairs, od_pairs.clone());
+        get_n_alighting(1, &all_station_stairs, &od_pairs);
 
     let (r, kanda_tp) = plot_step_by_step(
         n_passengers_alighting,

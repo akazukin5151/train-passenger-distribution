@@ -101,13 +101,13 @@ fn plot_boarding(
 }
 
 fn plot_combined<T>(
-    xs: Vec<f64>,
+    xs: &[f64],
     roots: &[DrawingArea<BitMapBackend, Shift>],
     multiplier: f64,
     kanda: &[(f64, T, T, T)],
 ) -> Result<(), Box<dyn std::error::Error>> {
     // data
-    let kde = make_kde(multiplier, &xs);
+    let kde = make_kde(multiplier, xs);
 
     // plot
     let root = &roots[6];
@@ -138,8 +138,8 @@ pub fn plot_step_by_step(
     let root = BitMapBackend::new(filename, (1024, 1500)).into_drawing_area();
     root.fill(&WHITE)?;
 
-    let tokyo_boarding_data = all_boarding_data[0].clone();
-    let kanda_boarding_data = all_boarding_data[1].clone();
+    let tokyo_boarding_data = &all_boarding_data[0];
+    let kanda_boarding_data = &all_boarding_data[1];
     let n_stairs = kanda_boarding_data.len();
 
     // plus n_stairs for passengers boarding from kanda
@@ -152,8 +152,8 @@ pub fn plot_step_by_step(
     // as tokyo is the first station, no need to remove passengers that alighted
     // in tokyo. but for other stations after kanda, all preceeding stations
     // need to have their combined net distribution calculated first
-    let tokyo_xs = sum_boarding_types(&tokyo_boarding_data);
-    plot_initial(&roots, &tokyo_xs, multiplier, &tokyo_boarding_data)?;
+    let tokyo_xs = sum_boarding_types(tokyo_boarding_data);
+    plot_initial(&roots, &tokyo_xs, multiplier, tokyo_boarding_data)?;
 
     // alighting
     let alight_xs: Vec<_> = tokyo_xs
@@ -168,12 +168,12 @@ pub fn plot_step_by_step(
     plot_alighting(&roots, &mut alight_xs.iter().cloned(), &mut remaining_xs)?;
 
     // boarding
-    plot_boarding(&roots, &kanda_boarding_data, multiplier)?;
+    plot_boarding(&roots, kanda_boarding_data, multiplier)?;
 
     // combined
-    let boarding_xs = sum_boarding_types(&kanda_boarding_data);
+    let boarding_xs = sum_boarding_types(kanda_boarding_data);
     let all_xs: Vec<_> = remaining_xs.cloned().chain(boarding_xs).collect();
-    plot_combined(all_xs.clone(), &roots, multiplier, &kanda_boarding_data)?;
+    plot_combined(&all_xs, &roots, multiplier, kanda_boarding_data)?;
 
     Ok((root.clone(), all_xs))
 }
