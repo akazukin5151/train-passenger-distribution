@@ -139,12 +139,12 @@ pub fn plot_step_by_step(
     Box<dyn std::error::Error>,
 > {
     // data
+    let tokyo_boarding_data = &all_boarding_data[0];
+    let tokyo_xs = sum_boarding_types(tokyo_boarding_data);
+
+    let kanda_boarding_data = &all_boarding_data[1];
     let n_passengers_alighting =
         get_n_alighting(1, &all_station_stairs, &od_pairs);
-    let tokyo_boarding_data = &all_boarding_data[0];
-    let kanda_boarding_data = &all_boarding_data[1];
-    let n_stairs = kanda_boarding_data.len();
-    let tokyo_xs = sum_boarding_types(tokyo_boarding_data);
 
     // alighting
     let alight_xs: Vec<_> = tokyo_xs
@@ -169,6 +169,7 @@ pub fn plot_step_by_step(
     // plus one for passengers already in the train
     // plus one for passengers alighting in kanda
     // plus one for combination of all above
+    let n_stairs = kanda_boarding_data.len();
     let roots = root.split_evenly((n_stairs + 3, 1));
 
     plot_initial(&roots, &tokyo_xs, multiplier, tokyo_boarding_data)?;
