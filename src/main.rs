@@ -12,20 +12,37 @@ use plot::*;
 use rand::prelude::SliceRandom;
 use utils::*;
 
+type BoardingData = Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>;
+
+type Accumulator = Vec<(
+    // boarding_data,
+    BoardingData,
+    // n_passengers_alighting,
+    i64,
+    // remaining_xs,
+    Vec<f64>,
+    // all_xs,
+    Vec<f64>,
+)>;
+
 fn combine_all(
     all_boarding_data: &Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>>,
     all_station_stairs: &[StationStairs],
     od_pairs: &[OdRow],
     tokyo_xs: Vec<f64>,
-) -> Vec<Vec<f64>> {
-    all_boarding_data
-        .iter()
-        .skip(1)
-        .fold((1, vec![tokyo_xs]), |(index, mut acc), boarding_data| {
-            let prev: &Vec<f64> = &acc[index - 1];
+) -> Accumulator {
+    let tokyo_row =
+        (all_boarding_data[0].clone(), 0, tokyo_xs.clone(), tokyo_xs);
+    all_boarding_data.iter().skip(1).fold(
+        vec![tokyo_row],
+        |mut acc, boarding_data| {
+            let acc_len = acc.len();
+            let nth_station = acc_len;
+            let index_of_last = acc_len - 1;
+            let (_, _, _, prev) = acc[index_of_last].clone();
 
             let n_passengers_alighting =
-                get_n_alighting(index, all_station_stairs, od_pairs);
+                get_n_alighting(nth_station, all_station_stairs, od_pairs);
 
             let n_passengers_remaining =
                 prev.len() - (n_passengers_alighting as usize);
@@ -39,14 +56,20 @@ fn combine_all(
 
             let boarding_xs = sum_boarding_types(boarding_data);
 
+            let y: Vec<_> = remaining_xs.cloned().collect();
             let all_xs: Vec<f64> =
-                remaining_xs.cloned().chain(boarding_xs).collect();
+                y.iter().cloned().chain(boarding_xs).collect();
 
-            acc.push(all_xs);
+            acc.push((
+                boarding_data.to_vec(),
+                n_passengers_alighting,
+                y,
+                all_xs,
+            ));
 
-            (index + 1, acc)
-        })
-        .1
+            acc.to_vec()
+        },
+    )
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -55,22 +78,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = generate_boarding_distributions(&all_station_stairs);
     let od_pairs = read_od_row();
 
-    let (r, kanda_tp) = plot_step_by_step(
-        &all_station_stairs,
-        &od_pairs,
-        &data,
-        "out/step-by-step.png",
-        12.0,
-    )?;
-    r.present()?;
-
     let tokyo = &data[0];
     let tokyo_xs = sum_boarding_types(tokyo);
 
-    let mut tp =
-        combine_all(&data, &all_station_stairs, &od_pairs, tokyo_xs.clone());
+    let result = combine_all(&data, &all_station_stairs, &od_pairs, tokyo_xs);
+
+    let tp: Vec<Vec<f64>> = result.iter().map(|x| x.3.clone()).collect();
+
     // the tokyo distribution is apparently the same
-    tp[1] = kanda_tp;
 
     plot_kde_separate(&all_station_stairs, &tp, 12.0)?.present()?;
     plot_strip(&all_station_stairs, &tp)?.present()?;
@@ -78,6 +93,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .present()?;
     plot_kde_together(&all_station_stairs, &tp, "out/smoothed.png", 25.0)?
         .present()?;
+
+    plot_step_by_step(&result, "out/step-by-step.png", 12.0)?.present()?;
 
     Ok(())
 }

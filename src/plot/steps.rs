@@ -1,9 +1,8 @@
-use crate::generate_data::get_n_alighting;
 use crate::kde::make_kde;
 use crate::plot::colors::*;
 use crate::plot::utils::*;
 use crate::sum_boarding_types;
-use crate::types::*;
+use crate::Accumulator;
 use crate::COLORS;
 use plotters::coord::Shift;
 use plotters::drawing::DrawingArea;
@@ -129,37 +128,34 @@ fn plot_combined<T>(
 }
 
 pub fn plot_step_by_step(
-    all_station_stairs: &Vec<StationStairs>,
-    od_pairs: &Vec<OdRow>,
-    all_boarding_data: &[Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>],
+    all_steps: &Accumulator,
     filename: &'static str,
     multiplier: f64,
 ) -> Result<
-    (DrawingArea<BitMapBackend<'static>, Shift>, Vec<f64>),
+    DrawingArea<BitMapBackend<'static>, Shift>,
     Box<dyn std::error::Error>,
 > {
     // data
-    let tokyo_boarding_data = &all_boarding_data[0];
+    let tokyo_step = &all_steps[0];
+    let tokyo_boarding_data = &tokyo_step.0;
     let tokyo_xs = sum_boarding_types(tokyo_boarding_data);
 
-    let kanda_boarding_data = &all_boarding_data[1];
-    let n_passengers_alighting =
-        get_n_alighting(1, &all_station_stairs, &od_pairs);
+    let kanda_step = &all_steps[1];
+    let kanda_boarding_data = &kanda_step.0;
+    let n_passengers_alighting = &kanda_step.1;
 
     // alighting
     let alight_xs: Vec<_> = tokyo_xs
         .choose_multiple(
             &mut rand::thread_rng(),
-            n_passengers_alighting.try_into().unwrap(),
+            (*n_passengers_alighting).try_into().unwrap(),
         )
         .collect();
 
-    let mut remaining_xs = tokyo_xs.iter().filter(|x| alight_xs.contains(x));
+    let remaining_xs = &kanda_step.2;
 
     // combined
-    let boarding_xs = sum_boarding_types(kanda_boarding_data);
-    let all_xs: Vec<_> =
-        remaining_xs.clone().cloned().chain(boarding_xs).collect();
+    let all_xs: &Vec<_> = &kanda_step.3;
 
     // plot
     let root = BitMapBackend::new(filename, (1024, 1500)).into_drawing_area();
@@ -174,11 +170,15 @@ pub fn plot_step_by_step(
 
     plot_initial(&roots, &tokyo_xs, multiplier, tokyo_boarding_data)?;
 
-    plot_alighting(&roots, &mut alight_xs.iter().cloned(), &mut remaining_xs)?;
+    plot_alighting(
+        &roots,
+        &mut alight_xs.iter().cloned(),
+        &mut remaining_xs.iter(),
+    )?;
 
     plot_boarding(&roots, kanda_boarding_data, multiplier)?;
 
-    plot_combined(&all_xs, &roots, multiplier, kanda_boarding_data)?;
+    plot_combined(all_xs, &roots, multiplier, kanda_boarding_data)?;
 
-    Ok((root.clone(), all_xs))
+    Ok(root.clone())
 }
