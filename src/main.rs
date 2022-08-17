@@ -16,10 +16,8 @@ fn combine_all(
     all_boarding_data: &Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>>,
     all_station_stairs: &[StationStairs],
     od_pairs: &[OdRow],
+    tokyo_xs: Vec<f64>,
 ) -> Vec<Vec<f64>> {
-    let tokyo = &all_boarding_data[0];
-    let tokyo_xs = sum_boarding_types(tokyo);
-
     all_boarding_data
         .iter()
         .skip(1)
@@ -58,14 +56,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let od_pairs = read_od_row();
 
     let (r, kanda_tp) = plot_step_by_step(
-        &all_station_stairs, &od_pairs,
+        &all_station_stairs,
+        &od_pairs,
         &data,
         "out/step-by-step.png",
         12.0,
     )?;
     r.present()?;
 
-    let mut tp = combine_all(&data, &all_station_stairs, &od_pairs);
+    let tokyo = &data[0];
+    let tokyo_xs = sum_boarding_types(tokyo);
+
+    let mut tp =
+        combine_all(&data, &all_station_stairs, &od_pairs, tokyo_xs.clone());
     // the tokyo distribution is apparently the same
     tp[1] = kanda_tp;
 
