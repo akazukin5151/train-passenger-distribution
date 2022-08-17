@@ -57,11 +57,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = generate_boarding_distributions(&all_station_stairs);
     let od_pairs = read_od_row();
 
-    let n_passengers_alighting =
-        get_n_alighting(1, &all_station_stairs, &od_pairs);
-
     let (r, kanda_tp) = plot_step_by_step(
-        n_passengers_alighting,
+        &all_station_stairs, &od_pairs,
         &data,
         "out/step-by-step.png",
         12.0,

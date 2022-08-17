@@ -1,7 +1,9 @@
+use crate::generate_data::get_n_alighting;
 use crate::kde::make_kde;
 use crate::plot::colors::*;
 use crate::plot::utils::*;
 use crate::sum_boarding_types;
+use crate::types::*;
 use crate::COLORS;
 use plotters::coord::Shift;
 use plotters::drawing::DrawingArea;
@@ -127,7 +129,8 @@ fn plot_combined<T>(
 }
 
 pub fn plot_step_by_step(
-    n_passengers_alighting: i64,
+    all_station_stairs: &Vec<StationStairs>,
+    od_pairs: &Vec<OdRow>,
     all_boarding_data: &[Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>],
     filename: &'static str,
     multiplier: f64,
@@ -135,17 +138,12 @@ pub fn plot_step_by_step(
     (DrawingArea<BitMapBackend<'static>, Shift>, Vec<f64>),
     Box<dyn std::error::Error>,
 > {
-    let root = BitMapBackend::new(filename, (1024, 1500)).into_drawing_area();
-    root.fill(&WHITE)?;
     // data
+    let n_passengers_alighting =
+        get_n_alighting(1, &all_station_stairs, &od_pairs);
     let tokyo_boarding_data = &all_boarding_data[0];
     let kanda_boarding_data = &all_boarding_data[1];
     let n_stairs = kanda_boarding_data.len();
-
-    // already in the train
-    // as tokyo is the first station, no need to remove passengers that alighted
-    // in tokyo. but for other stations after kanda, all preceeding stations
-    // need to have their combined net distribution calculated first
     let tokyo_xs = sum_boarding_types(tokyo_boarding_data);
 
     // alighting
@@ -164,6 +162,8 @@ pub fn plot_step_by_step(
         remaining_xs.clone().cloned().chain(boarding_xs).collect();
 
     // plot
+    let root = BitMapBackend::new(filename, (1024, 1500)).into_drawing_area();
+    root.fill(&WHITE)?;
 
     // plus n_stairs for passengers boarding from kanda
     // plus one for passengers already in the train
