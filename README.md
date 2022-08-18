@@ -24,8 +24,6 @@ Ochanomizu and Yotsuya has "stairs" on the far end of the platform, with the lat
 
 This chart shows the same data but in the same plot for easier inter-station comparison. The density on the left (front of train) after Ochanomizu and Yotsuya is immediately observable.
 
-Comparing Tokyo and Kanda, positions 60-100 has increased density after Kanda, whilst the rest of the train is more dense in Tokyo.
-
 ![smoothed](examples/smoothed.png)
 
 A naive way of modeling passenger dispersion to increase personal space is to increase the bandwidth for the kernel density estimate. This chart increases the bandwidth multiplier, smoothing out small differences, emphasizing focus on broader, larger scale differences. For example, the right-side stairs in Kanda increased passenger density on the right, but then decreases after Ochanomizu and Yotsuya as their stairs are on the left and center of the platform.
