@@ -15,20 +15,17 @@ pub struct StationStairs {
     pub stair_locations: Vec<f64>,
 }
 
-pub type BoardingData = Vec<(
-    // stair location
-    f64,
-    // beta far
-    Vec<f64>,
-    // beta close
-    Vec<f64>,
-    // uniform
-    Vec<f64>,
-)>;
+#[derive(Clone, Debug)]
+pub struct BoardingData {
+    pub stair_location: f64,
+    pub beta_far: Vec<f64>,
+    pub beta_close: Vec<f64>,
+    pub uniform: Vec<f64>,
+}
 
 pub type Accumulator = Vec<(
     // boarding_data,
-    BoardingData,
+    Vec<BoardingData>,
     // n_passengers_alighting,
     i64,
     // remaining_xs,

@@ -12,7 +12,7 @@ use rand::prelude::SliceRandom;
 use utils::*;
 
 fn combine_all(
-    all_boarding_data: &Vec<BoardingData>,
+    all_boarding_data: &Vec<Vec<BoardingData>>,
     all_station_stairs: &[StationStairs],
     od_pairs: &[OdRow],
     tokyo_xs: Vec<f64>,

@@ -1,12 +1,10 @@
-pub fn sum_boarding_types<T>(
-    boarding: &[(T, Vec<f64>, Vec<f64>, Vec<f64>)],
-) -> Vec<f64> {
-    boarding
-        .iter()
-        .fold(vec![], |mut acc, (_, far, close, uni)| {
-            acc.extend(far);
-            acc.extend(close);
-            acc.extend(uni);
-            acc
-        })
+use crate::types::BoardingData;
+
+pub fn sum_boarding_types(boarding: &Vec<BoardingData>) -> Vec<f64> {
+    boarding.iter().cloned().fold(vec![], |mut acc, bd| {
+        acc.extend(bd.beta_far);
+        acc.extend(bd.beta_close);
+        acc.extend(bd.uniform);
+        acc
+    })
 }

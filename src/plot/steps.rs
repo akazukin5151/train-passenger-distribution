@@ -11,11 +11,11 @@ use rand::distributions::Uniform;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 
-fn plot_initial<T>(
+fn plot_initial(
     roots: &[DrawingArea<BitMapBackend, Shift>],
     tokyo_xs: &[f64],
     multiplier: f64,
-    tokyo_boarding_data: &[(f64, T, T, T)],
+    tokyo_boarding_data: &Vec<BoardingData>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // data
     let kde = make_kde(multiplier, tokyo_xs);
@@ -29,8 +29,8 @@ fn plot_initial<T>(
 
     plot_platform_bounds(&chart, root, 0, 35)?;
 
-    for (stair, _, _, _) in tokyo_boarding_data {
-        plot_stairs(root, &chart, *stair, 0, 35)?;
+    for bd in tokyo_boarding_data {
+        plot_stairs(root, &chart, bd.stair_location, 0, 35)?;
     }
     Ok(())
 }
@@ -66,12 +66,10 @@ fn plot_alighting(
 
 fn plot_boarding(
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    boarding_data: &BoardingData,
+    boarding_data: &Vec<BoardingData>,
     multiplier: f64,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    for (i, (root, (stair, far, close, uni))) in
-        roots.iter().skip(2).zip(boarding_data).enumerate()
-    {
+    for (i, (root, bd)) in roots.iter().skip(2).zip(boarding_data).enumerate() {
         root.titled(
             &format!("Passengers boarding at Ochanomizu stair #{}", i + 1),
             ("sans-serif", 30),
@@ -79,8 +77,10 @@ fn plot_boarding(
         let mut chart = chart_with_mesh!(root, 0.0..0.25_f64);
 
         let labels = ["beta far", "beta close", "uniform"];
-        for ((xs, label), color) in
-            [far, close, uni].iter().zip(labels).zip(COLORS)
+        for ((xs, label), color) in [&bd.beta_far, &bd.beta_close, &bd.uniform]
+            .iter()
+            .zip(labels)
+            .zip(COLORS)
         {
             let kde = make_kde(multiplier, xs);
             chart
@@ -92,7 +92,7 @@ fn plot_boarding(
         let modifier = (209 * i + 434) as i32;
         plot_platform_bounds(&chart, root, modifier, 35)?;
 
-        plot_stairs(root, &chart, *stair, modifier, 35)?;
+        plot_stairs(root, &chart, bd.stair_location, modifier, 35)?;
 
         if i == 0 {
             add_legend!(&mut chart);
@@ -103,16 +103,14 @@ fn plot_boarding(
 
 fn plot_all_boarding(
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    boarding_data: &BoardingData,
+    boarding_data: &Vec<BoardingData>,
     multiplier: f64,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    for (i, (root, (stair, far, close, uni))) in
-        roots.iter().skip(2).zip(boarding_data).enumerate()
-    {
+    for (i, (root, bd)) in roots.iter().skip(2).zip(boarding_data).enumerate() {
         let mut acc: Vec<f64> = vec![];
-        acc.extend(far);
-        acc.extend(close);
-        acc.extend(uni);
+        acc.extend(&bd.beta_far);
+        acc.extend(&bd.beta_close);
+        acc.extend(&bd.uniform);
 
         root.titled(
             &format!("All passengers boarding at Ochanomizu stair #{}", i + 1),
@@ -126,17 +124,17 @@ fn plot_all_boarding(
         let modifier = (209 * i + 434) as i32;
         plot_platform_bounds(&chart, root, modifier, 35)?;
 
-        plot_stairs(root, &chart, *stair, modifier, 35)?;
+        plot_stairs(root, &chart, bd.stair_location, modifier, 35)?;
     }
     Ok(())
 }
 
-fn plot_combined<T>(
+fn plot_combined(
     title: &str,
     xs: &[f64],
     roots: &[DrawingArea<BitMapBackend, Shift>],
     multiplier: f64,
-    kanda: &[(f64, T, T, T)],
+    kanda: &Vec<BoardingData>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // data
     let kde = make_kde(multiplier, xs);
@@ -152,8 +150,8 @@ fn plot_combined<T>(
     let modifier = (209 * 4 + 434) as i32;
     plot_platform_bounds(&chart, root, modifier, 35)?;
 
-    for (stair, _, _, _) in kanda {
-        plot_stairs(root, &chart, *stair, modifier, 35)?;
+    for bd in kanda {
+        plot_stairs(root, &chart, bd.stair_location, modifier, 35)?;
     }
     Ok(())
 }
@@ -215,11 +213,11 @@ pub fn plot_step_by_step(
     plot_all_boarding(&right_roots, this_boarding_data, multiplier)?;
 
     let mut bs = vec![];
-    for (_, far, close, uni) in this_boarding_data {
+    for bd in this_boarding_data {
         let mut acc: Vec<f64> = vec![];
-        acc.extend(far);
-        acc.extend(close);
-        acc.extend(uni);
+        acc.extend(&bd.beta_far);
+        acc.extend(&bd.beta_close);
+        acc.extend(&bd.uniform);
         bs.extend(acc);
     }
     plot_combined(

@@ -38,7 +38,7 @@ pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {
 
 pub fn generate_boarding_distributions(
     all_station_stairs: &[StationStairs],
-) -> Vec<BoardingData> {
+) -> Vec<Vec<BoardingData>> {
     let n_people = 200;
     let prop_normal_far = 0.6;
     let prop_uniform = 0.1;
@@ -68,7 +68,12 @@ pub fn generate_boarding_distributions(
                         *stair_location,
                     );
                     let uniform = stairs_to_uniform(n_uniform);
-                    (*stair_location, far, close, uniform)
+                    BoardingData {
+                        stair_location: *stair_location,
+                        beta_far: far,
+                        beta_close: close,
+                        uniform,
+                    }
                 })
                 .collect()
         })
