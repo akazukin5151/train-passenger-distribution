@@ -16,16 +16,20 @@ fn combine_all(
     all_station_stairs: &[StationStairs],
     od_pairs: &[OdRow],
     tokyo_xs: Vec<f64>,
-) -> Accumulator {
-    let tokyo_row =
-        (all_boarding_data[0].clone(), 0, tokyo_xs.clone(), tokyo_xs);
+) -> Vec<Accumulator> {
+    let tokyo_row = Accumulator {
+        boarding_data: all_boarding_data[0].clone(),
+        n_passengers_alighting: 0,
+        remaining_xs: tokyo_xs.clone(),
+        all_xs: tokyo_xs,
+    };
     all_boarding_data.iter().skip(1).fold(
         vec![tokyo_row],
         |mut acc, boarding_data| {
             let acc_len = acc.len();
             let nth_station = acc_len;
             let index_of_last = acc_len - 1;
-            let (_, _, _, prev) = acc[index_of_last].clone();
+            let prev = acc[index_of_last].clone().all_xs;
 
             let n_passengers_alighting =
                 get_n_alighting(nth_station, all_station_stairs, od_pairs);
@@ -46,12 +50,12 @@ fn combine_all(
             let all_xs: Vec<f64> =
                 y.iter().cloned().chain(boarding_xs).collect();
 
-            acc.push((
-                boarding_data.to_vec(),
+            acc.push(Accumulator {
+                boarding_data: boarding_data.to_vec(),
                 n_passengers_alighting,
-                y,
+                remaining_xs: y,
                 all_xs,
-            ));
+            });
 
             acc.to_vec()
         },
@@ -69,7 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let result = combine_all(&data, &all_station_stairs, &od_pairs, tokyo_xs);
 
-    let tp: Vec<Vec<f64>> = result.iter().map(|x| x.3.clone()).collect();
+    let tp: Vec<Vec<f64>> = result.iter().map(|x| x.all_xs.clone()).collect();
 
     // the tokyo distribution is apparently the same
 

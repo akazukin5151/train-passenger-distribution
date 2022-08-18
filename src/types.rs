@@ -23,13 +23,10 @@ pub struct BoardingData {
     pub uniform: Vec<f64>,
 }
 
-pub type Accumulator = Vec<(
-    // boarding_data,
-    Vec<BoardingData>,
-    // n_passengers_alighting,
-    i64,
-    // remaining_xs,
-    Vec<f64>,
-    // all_xs,
-    Vec<f64>,
-)>;
+#[derive(Clone, Debug)]
+pub struct Accumulator {
+    pub boarding_data: Vec<BoardingData>,
+    pub n_passengers_alighting: i64,
+    pub remaining_xs: Vec<f64>,
+    pub all_xs: Vec<f64>,
+}

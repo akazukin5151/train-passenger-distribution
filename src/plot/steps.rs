@@ -157,7 +157,7 @@ fn plot_combined(
 }
 
 pub fn plot_step_by_step(
-    all_steps: &Accumulator,
+    all_steps: &Vec<Accumulator>,
     filename: &'static str,
     multiplier: f64,
 ) -> Result<
@@ -166,12 +166,12 @@ pub fn plot_step_by_step(
 > {
     // data
     let initial_step = &all_steps[1];
-    let initial_boarding_data = &initial_step.0;
-    let initial_xs = &initial_step.3;
+    let initial_boarding_data = &initial_step.boarding_data;
+    let initial_xs = &initial_step.all_xs;
 
     let this_step = &all_steps[2];
-    let this_boarding_data = &this_step.0;
-    let n_passengers_alighting = &this_step.1;
+    let this_boarding_data = &this_step.boarding_data;
+    let n_passengers_alighting = &this_step.n_passengers_alighting;
 
     // alighting
     let alight_xs: Vec<_> = initial_xs
@@ -181,10 +181,10 @@ pub fn plot_step_by_step(
         )
         .collect();
 
-    let remaining_xs = &this_step.2;
+    let remaining_xs = &this_step.remaining_xs;
 
     // combined
-    let all_xs: &Vec<_> = &this_step.3;
+    let all_xs: &Vec<_> = &this_step.all_xs;
 
     // plot
     let root =
