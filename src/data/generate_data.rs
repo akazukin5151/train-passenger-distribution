@@ -38,7 +38,7 @@ pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {
 
 pub fn generate_boarding_distributions(
     all_station_stairs: &[StationStairs],
-) -> Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>> {
+) -> Vec<BoardingData> {
     let n_people = 200;
     let prop_normal_far = 0.6;
     let prop_uniform = 0.1;

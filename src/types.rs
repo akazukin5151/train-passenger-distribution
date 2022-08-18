@@ -15,3 +15,15 @@ pub struct StationStairs {
     pub stair_locations: Vec<f64>,
 }
 
+pub type BoardingData = Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>;
+
+pub type Accumulator = Vec<(
+    // boarding_data,
+    BoardingData,
+    // n_passengers_alighting,
+    i64,
+    // remaining_xs,
+    Vec<f64>,
+    // all_xs,
+    Vec<f64>,
+)>;

@@ -2,6 +2,7 @@ use crate::kde::make_kde;
 use crate::plot::colors::*;
 use crate::plot::utils::*;
 use crate::sum_boarding_types;
+use crate::types::*;
 use crate::Accumulator;
 use crate::COLORS;
 use plotters::coord::Shift;
@@ -66,7 +67,7 @@ fn plot_alighting(
 
 fn plot_boarding(
     roots: &[DrawingArea<BitMapBackend, Shift>],
-    boarding_data: &[(f64, Vec<f64>, Vec<f64>, Vec<f64>)],
+    boarding_data: &BoardingData,
     multiplier: f64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     for (i, (root, (stair, far, close, uni))) in

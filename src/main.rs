@@ -5,28 +5,14 @@ mod plot;
 mod types;
 mod utils;
 
-use crate::types::OdRow;
-use crate::types::StationStairs;
+use crate::types::*;
 use data::*;
 use plot::*;
 use rand::prelude::SliceRandom;
 use utils::*;
 
-type BoardingData = Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>;
-
-type Accumulator = Vec<(
-    // boarding_data,
-    BoardingData,
-    // n_passengers_alighting,
-    i64,
-    // remaining_xs,
-    Vec<f64>,
-    // all_xs,
-    Vec<f64>,
-)>;
-
 fn combine_all(
-    all_boarding_data: &Vec<Vec<(f64, Vec<f64>, Vec<f64>, Vec<f64>)>>,
+    all_boarding_data: &Vec<BoardingData>,
     all_station_stairs: &[StationStairs],
     od_pairs: &[OdRow],
     tokyo_xs: Vec<f64>,
