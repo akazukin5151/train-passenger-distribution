@@ -15,6 +15,10 @@ pub fn beta_(mean: f64, stdev: f64, x: f64) -> f64 {
     let n = (mean * (1.0 - mean)) / stdev.powi(2);
     let alpha = mean * n;
     let beta = (1.0 - mean) * n;
+    if mean == 0.12347517463778396 {
+        dbg!(alpha);
+        dbg!(beta);
+    }
     statrs::distribution::Beta::new(alpha, beta).unwrap().pdf(x)
 }
 

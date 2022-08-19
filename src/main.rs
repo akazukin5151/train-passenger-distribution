@@ -65,26 +65,36 @@ fn combine_all(
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let stations = vec!["東京", "神田", "御茶ノ水", "四ッ谷"];
     let all_station_stairs = read_station_stairs(stations);
-    let data = generate_boarding_distributions(&all_station_stairs);
-    let od_pairs = read_od_row();
+    //let data = generate_boarding_distributions(&all_station_stairs);
+    //let od_pairs = read_od_row();
 
-    let tokyo = &data[0];
-    let tokyo_xs = sum_boarding_types(tokyo);
+    let x = make_pdf_for_station(
+        &all_station_stairs,
+        &std::iter::repeat(0.3_f64)
+            .take(all_station_stairs.len())
+            .collect::<Vec<_>>(),
+        0,
+        0,
+    );
+    dbg!(x);
 
-    let result = combine_all(&data, &all_station_stairs, &od_pairs, tokyo_xs);
+    //let tokyo = &data[0];
+    //let tokyo_xs = sum_boarding_types(tokyo);
 
-    let tp: Vec<Vec<f64>> = result.iter().map(|x| x.all_xs.clone()).collect();
+    //let result = combine_all(&data, &all_station_stairs, &od_pairs, tokyo_xs);
 
-    // the tokyo distribution is apparently the same
+    //let tp: Vec<Vec<f64>> = result.iter().map(|x| x.all_xs.clone()).collect();
 
-    plot_kde_separate(&all_station_stairs, &tp, 12.0)?.present()?;
-    plot_strip(&all_station_stairs, &tp)?.present()?;
-    plot_kde_together(&all_station_stairs, &tp, "out/together.png", 12.0)?
-        .present()?;
-    plot_kde_together(&all_station_stairs, &tp, "out/smoothed.png", 25.0)?
-        .present()?;
+    //// the tokyo distribution is apparently the same
 
-    plot_step_by_step(&result, "out/step-by-step.png", 12.0)?.present()?;
+    //plot_kde_separate(&all_station_stairs, &tp, 12.0)?.present()?;
+    //plot_strip(&all_station_stairs, &tp)?.present()?;
+    //plot_kde_together(&all_station_stairs, &tp, "out/together.png", 12.0)?
+    //    .present()?;
+    //plot_kde_together(&all_station_stairs, &tp, "out/smoothed.png", 25.0)?
+    //    .present()?;
+
+    //plot_step_by_step(&result, "out/step-by-step.png", 12.0)?.present()?;
 
     Ok(())
 }

@@ -1,9 +1,72 @@
 use crate::data::read_data::*;
 use crate::data::utils::*;
 use crate::types::*;
+use cached::proc_macro::cached;
+use cached::UnboundCache;
 use rand::distributions::Uniform;
 use rand::Rng;
 use rand_distr::Distribution;
+use statrs::distribution::Continuous;
+
+// m
+#[cached(
+    type = "UnboundCache<(usize, i32), f64>",
+    create = "{ UnboundCache::new() }",
+    convert = " { (i, x) } "
+)]
+pub fn make_pdf_for_station(
+    stations: &[StationStairs],
+    alighting_proportions: &[f64],
+    i: usize,
+    x: i32,
+) -> f64 {
+    let common = make_boarding_pdf_for_station(stations, i, x);
+    if i == 0 {
+        common
+    } else {
+        let proportion_alighting = alighting_proportions[i];
+        // TODO
+        let a = make_pdf_for_station(stations, alighting_proportions, i - 1, x)
+            * (1.0 - proportion_alighting);
+        let b = common * proportion_alighting;
+        a + b
+    }
+}
+
+// b
+fn make_boarding_pdf_for_station(
+    stations: &[StationStairs],
+    i: usize,
+    x: i32,
+) -> f64 {
+    stations[i]
+        .stair_locations
+        .iter()
+        .map(|stair| stair_pdfs(stair, x))
+        .sum()
+}
+
+// S
+fn stair_pdfs(stair: &f64, x: i32) -> f64 {
+    let prop_normal_far = 0.6;
+    let prop_uniform = 0.1;
+    let prop_normal_close = 0.3;
+    let far_stdev = 0.2;
+    let close_stdev = 0.1;
+
+    let mean = clamp(*stair) / 100.0;
+    let a = beta_(mean, far_stdev, x as f64) * prop_normal_far;
+    let b = beta_(mean, close_stdev, x as f64) * prop_normal_close;
+    let c = statrs::distribution::Uniform::new(0.0, 100.)
+        .unwrap()
+        .pdf(x as f64)
+        * prop_uniform;
+
+    if a == f64::INFINITY {
+        dbg!(mean);
+    }
+    a + b + c
+}
 
 fn stairs_to_beta(far_stdev: f64, n_normal_far: f64, stair: f64) -> Vec<f64> {
     let mut rng = rand::thread_rng();
