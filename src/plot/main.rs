@@ -121,3 +121,22 @@ pub fn plot_strip(
         }
     )
 }
+
+pub fn plot_pdfs(
+    filename: &str,
+    pdfs: Vec<Vec<(f64, f64)>>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let root = BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    let roots = root.split_evenly((pdfs.len(), 1));
+
+    for (pdf, r) in pdfs.iter().zip(roots) {
+        let mut chart = chart_with_mesh!(&r, 0.0..15.0_f64);
+        chart
+            .draw_series(LineSeries::new(pdf.clone(), BLUE.stroke_width(2)))?;
+        plot_platform_bounds(&chart, &r, 0, 35)?;
+    }
+
+    Ok(())
+}

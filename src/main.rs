@@ -68,15 +68,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let data = generate_boarding_distributions(&all_station_stairs);
     //let od_pairs = read_od_row();
 
-    let x = make_pdf_for_station(
-        &all_station_stairs,
-        &std::iter::repeat(0.3_f64)
-            .take(all_station_stairs.len())
-            .collect::<Vec<_>>(),
-        0,
-        0,
-    );
-    dbg!(x);
+    let x: Vec<Vec<(f64, f64)>> = all_station_stairs
+        .iter()
+        .enumerate()
+        .map(|(idx, _)| {
+            (0..=100)
+                .map(|x| {
+                    let y = make_pdf_for_station(
+                        &all_station_stairs,
+                        &std::iter::repeat(0.3_f64)
+                            .take(all_station_stairs.len())
+                            .collect::<Vec<_>>(),
+                        idx,
+                        x as f64 / 100.0,
+                    );
+                    (x as f64, y)
+                })
+                .collect()
+        })
+        .collect();
+
+    plot_pdfs("out/pdfs.png", x)?;
 
     //let tokyo = &data[0];
     //let tokyo_xs = sum_boarding_types(tokyo);
@@ -98,3 +110,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+

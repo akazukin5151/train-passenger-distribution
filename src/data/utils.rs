@@ -11,14 +11,9 @@ pub fn beta(mean: f64, stdev: f64) -> Result<Beta<f64>, BetaError> {
     Beta::new(alpha, beta)
 }
 
-pub fn beta_(mean: f64, stdev: f64, x: f64) -> f64 {
-    let n = (mean * (1.0 - mean)) / stdev.powi(2);
-    let alpha = mean * n;
-    let beta = (1.0 - mean) * n;
-    if mean == 0.12347517463778396 {
-        dbg!(alpha);
-        dbg!(beta);
-    }
+pub fn beta_(mode: f64, concentration: f64, x: f64) -> f64 {
+    let alpha = mode * (concentration - 2.0) + 1.0;
+    let beta = concentration - alpha;
     statrs::distribution::Beta::new(alpha, beta).unwrap().pdf(x)
 }
 
