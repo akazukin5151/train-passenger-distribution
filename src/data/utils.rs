@@ -1,15 +1,4 @@
-use rand_distr::Beta;
-use rand_distr::BetaError;
 use statrs::distribution::Continuous;
-
-/// Reformulation of the beta distribution in terms of mean and standard deviation
-/// Originally it accepts two shapes, alpha and beta
-pub fn beta(mean: f64, stdev: f64) -> Result<Beta<f64>, BetaError> {
-    let n = (mean * (1.0 - mean)) / stdev.powi(2);
-    let alpha = mean * n;
-    let beta = (1.0 - mean) * n;
-    Beta::new(alpha, beta)
-}
 
 pub fn beta_(mode: f64, concentration: f64, x: f64) -> f64 {
     let alpha = mode * (concentration - 2.0) + 1.0;

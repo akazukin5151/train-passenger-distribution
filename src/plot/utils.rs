@@ -3,10 +3,6 @@ use plotters::chart::SeriesAnno;
 use plotters::coord::types::RangedCoordf64;
 use plotters::coord::Shift;
 use plotters::prelude::*;
-use rand::distributions::Uniform;
-use rand::prelude::IteratorRandom;
-use rand::rngs::ThreadRng;
-use rand_distr::DistIter;
 
 pub type Chart<'a, 'b> = ChartContext<
     'a,
@@ -38,26 +34,6 @@ macro_rules! chart_with_mesh {
         chart
             .configure_mesh()
             .axis_desc_style(("sans-serif", 20_i32).into_text_style($root))
-            .light_line_style(&WHITE)
-            .draw()
-            .unwrap();
-        chart
-    }};
-}
-
-macro_rules! chart_with_mesh_and_ydesc {
-    ($root: expr, $y_range: expr, $ydesc: expr) => {{
-        let mut chart = basic_chart!($root)
-            .margin_top(30_i32)
-            .build_cartesian_2d(-10.0..110.0_f64, $y_range)
-            .unwrap();
-
-        chart
-            .configure_mesh()
-            .y_desc($ydesc)
-            .axis_desc_style(
-                ("Hiragino Sans GB W3", 20_i32).into_text_style($root),
-            )
             .light_line_style(&WHITE)
             .draw()
             .unwrap();
@@ -114,24 +90,6 @@ fn plot_vline(
         stroke,
     );
     root.draw(&p)?;
-    Ok(())
-}
-
-pub fn plot_points(
-    chart: &mut Chart,
-    xs: &mut dyn Iterator<Item = &f64>,
-    ys: DistIter<Uniform<f64>, ThreadRng, f64>,
-    color: RGBColor,
-    label: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
-    chart
-        .draw_series(
-            xs.zip(ys)
-                .map(|(x, y)| Circle::new((*x, y), 2_i32, color.filled()))
-                .choose_multiple(&mut rand::thread_rng(), 200),
-        )?
-        .label(label)
-        .add_legend_icon(color);
     Ok(())
 }
 

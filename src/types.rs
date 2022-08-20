@@ -15,18 +15,3 @@ pub struct StationStairs {
     pub stair_locations: Vec<f64>,
 }
 
-#[derive(Clone, Debug)]
-pub struct BoardingData {
-    pub stair_location: f64,
-    pub beta_far: Vec<f64>,
-    pub beta_close: Vec<f64>,
-    pub uniform: Vec<f64>,
-}
-
-#[derive(Clone, Debug)]
-pub struct Accumulator {
-    pub boarding_data: Vec<BoardingData>,
-    pub n_passengers_alighting: i64,
-    pub remaining_xs: Vec<f64>,
-    pub all_xs: Vec<f64>,
-}
