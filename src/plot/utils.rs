@@ -66,14 +66,14 @@ macro_rules! chart_with_mesh_and_ydesc {
 }
 
 macro_rules! add_legend {
-    ($chart: expr) => {{
+    ($chart: expr, $font: expr) => {{
         $chart
             .configure_series_labels()
             .position(SeriesLabelPosition::UpperRight)
             .background_style(WHITE.filled())
             .border_style(&BLACK.mix(0.5))
             .legend_area_size(22_i32)
-            .label_font(("sans-serif", 20_i32))
+            .label_font(($font, 20_i32))
             .draw()
     }};
 }

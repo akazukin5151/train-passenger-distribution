@@ -89,6 +89,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect();
 
     plot_pdfs("out/out2.png", &all_station_stairs, pdfs.clone())?;
+    plot_pdfs_together("out/together2.png", &all_station_stairs, pdfs.clone())?;
 
     let x: Vec<Vec<(f64, (f64, f64, f64))>> = (1..=100)
         .map(|x| {

@@ -201,7 +201,7 @@ pub fn plot_stair_pdfs_sep(
         plot_stairs(r, &chart, stairs[idx], 0, 35).unwrap();
 
         if idx == 0 {
-            add_legend!(chart).unwrap();
+            add_legend!(chart, "sans-serif").unwrap();
         }
     }
 
@@ -277,6 +277,30 @@ pub fn plot_stair_pdfs_sep(
         plot_stairs(r, &chart, *stair, 0, 35).unwrap();
     }
     plot_platform_bounds(&chart, r, 0, 35).unwrap();
+
+    Ok(())
+}
+
+pub fn plot_pdfs_together(
+    filename: &str,
+    all_station_stairs: &Vec<StationStairs>,
+    pdfs: Vec<Vec<(f64, f64)>>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let root = BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    let mut chart = chart_with_mesh!(&root, 0.0..2.0_f64);
+
+    for ((pdf, color), station) in
+        pdfs.iter().zip(COLORS).zip(all_station_stairs)
+    {
+        chart
+            .draw_series(LineSeries::new(pdf.clone(), color.stroke_width(2)))?
+            .label(&station.station_name)
+            .add_legend_icon(color);
+    }
+    plot_platform_bounds(&chart, &root, 0, 35)?;
+    add_legend!(chart, "Hiragino Sans GB W3")?;
 
     Ok(())
 }

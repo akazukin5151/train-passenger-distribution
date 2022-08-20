@@ -60,7 +60,7 @@ fn plot_alighting(
     )?;
 
     plot_platform_bounds(&chart, root, 210, 30)?;
-    add_legend!(&mut chart);
+    add_legend!(&mut chart, "sans-serif");
     Ok(())
 }
 
@@ -95,7 +95,7 @@ fn plot_boarding(
         plot_stairs(root, &chart, bd.stair_location, modifier, 35)?;
 
         if i == 0 {
-            add_legend!(&mut chart);
+            add_legend!(&mut chart, "sans-serif");
         }
     }
     Ok(())
