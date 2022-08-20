@@ -151,11 +151,44 @@ pub fn plot_stair_pdfs(
     let roots = root.split_evenly((pdfs[0].len(), 1));
 
     for (idx, r) in roots.iter().enumerate() {
-        let mut chart = chart_with_mesh!(r, 0.0..15.0_f64);
+        let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
         let pdf = &pdfs.iter().map(|x| x[idx]);
         chart
             .draw_series(LineSeries::new(pdf.clone(), BLUE.stroke_width(2)))?;
         plot_platform_bounds(&chart, r, 0, 35)?;
+    }
+
+    Ok(())
+}
+
+pub fn plot_stair_pdfs_sep(
+    filename: &str,
+    pdfs: Vec<Vec<(f64, (f64, f64, f64))>>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let root = BitMapBackend::new(filename, (1024, 1000)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    let roots = root.split_evenly((pdfs[0].len(), 1));
+
+    for (idx, r) in roots.iter().enumerate() {
+        let mut chart = chart_with_mesh!(r, 0.0..1.5_f64);
+        let as_: [fn((f64, f64, f64)) -> f64; 3] =
+            [|ys| ys.0, |ys| ys.1, |ys| ys.2];
+        let labels = ["beta_far", "beta_close", "uniform"];
+        for ((a, color), label) in as_.iter().zip(COLORS).zip(labels) {
+            let pdf = &pdfs.iter().map(|x| x[idx]).map(|(x, ys)| (x, a(ys)));
+            chart
+                .draw_series(LineSeries::new(
+                    pdf.clone(),
+                    color.stroke_width(2),
+                ))?
+                .label(label)
+                .add_legend_icon(color);
+        }
+        plot_platform_bounds(&chart, r, 0, 35)?;
+        if idx == 0 {
+            add_legend!(chart);
+        }
     }
 
     Ok(())

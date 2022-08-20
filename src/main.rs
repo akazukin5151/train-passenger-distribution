@@ -68,43 +68,44 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let data = generate_boarding_distributions(&all_station_stairs);
     //let od_pairs = read_od_row();
 
-    let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
-        .iter()
-        .enumerate()
-        .map(|(idx, _)| {
-            (1..=100)
-                .map(|x| {
-                    let y = make_pdf_for_station(
-                        &all_station_stairs,
-                        &std::iter::repeat(1.0_f64)
-                            .take(all_station_stairs.len())
-                            .collect::<Vec<_>>(),
-                        idx,
-                        x as f64 / 100.0,
-                    );
-                    (x as f64, y)
-                })
-                .collect()
-        })
-        .collect();
-
-    plot_pdfs("out/pdfs.png", pdfs)?;
-
-    //let x: Vec<Vec<(f64, f64)>> = (1..=100)
-    //    .map(|x| {
-    //        all_station_stairs[0]
-    //            .stair_locations
-    //            .iter()
-    //            .map(|stair| {
-    //                let y = stair_pdfs(stair, x as f64 / 100.)
-    //                    / all_station_stairs[0].stair_locations.len() as f64;
+    //let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
+    //    .iter()
+    //    .enumerate()
+    //    .map(|(idx, _)| {
+    //        (1..=100)
+    //            .map(|x| {
+    //                let y = make_pdf_for_station(
+    //                    &all_station_stairs,
+    //                    &std::iter::repeat(1.0_f64)
+    //                        .take(all_station_stairs.len())
+    //                        .collect::<Vec<_>>(),
+    //                    idx,
+    //                    x as f64 / 100.0,
+    //                );
     //                (x as f64, y)
     //            })
     //            .collect()
     //    })
     //    .collect();
 
-    //plot_stair_pdfs("out/pdfs.png", x)?;
+    //plot_pdfs("out/pdfs.png", pdfs)?;
+
+    let x: Vec<Vec<(f64, (f64, f64, f64))>> = (1..=100)
+        .map(|x| {
+            all_station_stairs[2]
+                .stair_locations
+                .iter()
+                .map(|stair| {
+                    let div =
+                        all_station_stairs[2].stair_locations.len() as f64;
+                    let (a, b, c) = stair_pdfs_sep(stair, x as f64 / 100.);
+                    (x as f64, (a / div, b / div, c / div))
+                })
+                .collect()
+        })
+        .collect();
+
+    plot_stair_pdfs_sep("out/pdfs.png", x)?;
 
     //let tokyo = &data[0];
     //let tokyo_xs = sum_boarding_types(tokyo);

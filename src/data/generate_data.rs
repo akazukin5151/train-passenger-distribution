@@ -47,6 +47,11 @@ pub fn make_boarding_pdf_for_station(
 
 // S
 pub fn stair_pdfs(stair: &f64, x: f64) -> f64 {
+    let (a, b, c) = stair_pdfs_sep(stair, x);
+    a + b + c
+}
+
+pub fn stair_pdfs_sep(stair: &f64, x: f64) -> (f64, f64, f64) {
     let prop_normal_far = 0.6;
     let prop_uniform = 0.1;
     let prop_normal_close = 0.3;
@@ -60,7 +65,7 @@ pub fn stair_pdfs(stair: &f64, x: f64) -> f64 {
     let c = statrs::distribution::Uniform::new(0.0, 1.).unwrap().pdf(x)
         * prop_uniform;
 
-    a + b + c
+    (a, b, c)
 }
 
 fn stairs_to_beta(far_stdev: f64, n_normal_far: f64, stair: f64) -> Vec<f64> {
