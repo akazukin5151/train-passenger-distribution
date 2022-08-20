@@ -18,13 +18,14 @@ $$m_0=b_i\times p_a$$
 
 $$m_i=(m_{i-1}\times p_{1-a})+(b_i\times p_a)$$
 
-$$b_i=\sum_{j=0}^{j_{max}}\frac{S_j}{j_{max}}$$
+$$b_i=\sum_{j=0}^{n_j}\frac{S_j}{n_j}$$
 
 $$S_j=(B_c\times p_o) + (B_f\times p_f) + (U\times p_u)$$
 
 - $b_i$ is the distribution of passengers boarding the train at station $i$
 - $p_a$ is the proportion of passengers alighting at station $i$
 - $j$ is the j-th stair at station $i$
+- $n_j$ is the number of stairs at station $i$
 - $S_j$ is the distribution of boarders coming from stair $j$
 - $B$ is the pdf of the beta distribution; $B_c$ means with a small variance and $B_f$ means a large variance
 - $U$ is the pdf of the uniform distribution (supported on the platform boundaries)
