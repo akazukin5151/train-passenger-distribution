@@ -132,12 +132,26 @@ pub fn plot_pdfs(
 
     let roots = root.split_evenly((pdfs.len(), 1));
 
-    for ((pdf, r), station) in pdfs.iter().zip(roots).zip(all_station_stairs) {
+    for ((idx, r), station) in roots.iter().enumerate().zip(all_station_stairs)
+    {
         let mut chart =
-            chart_with_mesh_and_ydesc!(&r, 0.0..2.0_f64, &station.station_name);
-        chart
-            .draw_series(LineSeries::new(pdf.clone(), BLUE.stroke_width(2)))?;
-        plot_platform_bounds(&chart, &r, 0, 35)?;
+            chart_with_mesh_and_ydesc!(r, 0.0..2.0_f64, &station.station_name);
+
+        for (i, pdf) in pdfs.iter().enumerate() {
+            let color = if i == idx {
+                let c: RGBColor = COLORS[i];
+                c.stroke_width(2)
+            } else {
+                GRAY.filled()
+            };
+            chart.draw_series(LineSeries::new(pdf.clone(), color))?;
+        }
+
+        plot_platform_bounds(&chart, r, 0, 35)?;
+
+        for stair in &station.stair_locations {
+            plot_stairs(r, &chart, *stair, 0, 35).unwrap();
+        }
     }
 
     Ok(())
