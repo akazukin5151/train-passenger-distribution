@@ -124,6 +124,7 @@ pub fn plot_strip(
 
 pub fn plot_pdfs(
     filename: &str,
+    all_station_stairs: &Vec<StationStairs>,
     pdfs: Vec<Vec<(f64, f64)>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
@@ -131,8 +132,9 @@ pub fn plot_pdfs(
 
     let roots = root.split_evenly((pdfs.len(), 1));
 
-    for (pdf, r) in pdfs.iter().zip(roots) {
-        let mut chart = chart_with_mesh!(&r, 0.0..3.0_f64);
+    for ((pdf, r), station) in pdfs.iter().zip(roots).zip(all_station_stairs) {
+        let mut chart =
+            chart_with_mesh_and_ydesc!(&r, 0.0..2.0_f64, &station.station_name);
         chart
             .draw_series(LineSeries::new(pdf.clone(), BLUE.stroke_width(2)))?;
         plot_platform_bounds(&chart, &r, 0, 35)?;
@@ -141,39 +143,32 @@ pub fn plot_pdfs(
     Ok(())
 }
 
-pub fn plot_stair_pdfs(
-    filename: &str,
-    pdfs: Vec<Vec<(f64, f64)>>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new(filename, (1024, 2000)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let roots = root.split_evenly((pdfs[0].len(), 1));
-
-    for (idx, r) in roots.iter().enumerate() {
-        let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
-        let pdf = &pdfs.iter().map(|x| x[idx]);
-        chart
-            .draw_series(LineSeries::new(pdf.clone(), BLUE.stroke_width(2)))?;
-        plot_platform_bounds(&chart, r, 0, 35)?;
-    }
-
-    Ok(())
-}
-
 pub fn plot_stair_pdfs_sep(
     filename: &str,
     pdfs: Vec<Vec<(f64, (f64, f64, f64))>>,
+    stairs: &Vec<f64>,
+    prev_pdf: &Vec<(f64, f64)>,
+    this_pdf: &Vec<(f64, f64)>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new(filename, (1024, 1000)).into_drawing_area();
+    let n_stairs = stairs.len();
+
+    let root =
+        BitMapBackend::new(filename, (1024 * 2, 1500)).into_drawing_area();
     root.fill(&WHITE)?;
 
-    let roots = root.split_evenly((pdfs[0].len(), 1));
+    let (left, right) = root.split_horizontally(1024_i32);
+    let right_roots = right.split_evenly((n_stairs + 2, 1));
+    let roots = left.split_evenly((n_stairs + 2, 1));
 
-    for (idx, r) in roots.iter().enumerate() {
+    let as_: [fn((f64, f64, f64)) -> f64; 3] =
+        [|ys| ys.0, |ys| ys.1, |ys| ys.2];
+
+    for (idx, r) in roots.iter().enumerate().take(n_stairs) {
+        r.titled(
+            &format!("Passengers boarding at Ochanomizu stair #{}", idx + 1),
+            ("sans-serif", 30_i32),
+        )?;
         let mut chart = chart_with_mesh!(r, 0.0..1.5_f64);
-        let as_: [fn((f64, f64, f64)) -> f64; 3] =
-            [|ys| ys.0, |ys| ys.1, |ys| ys.2];
         let labels = ["beta_far", "beta_close", "uniform"];
         for ((a, color), label) in as_.iter().zip(COLORS).zip(labels) {
             let pdf = &pdfs.iter().map(|x| x[idx]).map(|(x, ys)| (x, a(ys)));
@@ -181,15 +176,93 @@ pub fn plot_stair_pdfs_sep(
                 .draw_series(LineSeries::new(
                     pdf.clone(),
                     color.stroke_width(2),
-                ))?
+                ))
+                .unwrap()
                 .label(label)
                 .add_legend_icon(color);
         }
-        plot_platform_bounds(&chart, r, 0, 35)?;
+
+        plot_platform_bounds(&chart, r, 0, 35).unwrap();
+
+        plot_stairs(r, &chart, stairs[idx], 0, 35).unwrap();
+
         if idx == 0 {
-            add_legend!(chart);
+            add_legend!(chart).unwrap();
         }
     }
+
+    let sum_pdfs: Vec<Vec<(f64, f64)>> = right_roots
+        .iter()
+        .enumerate()
+        .take(n_stairs)
+        .map(|(idx, r)| {
+            r.titled(
+                &format!("S_{}/{}", idx + 1, n_stairs),
+                ("sans-serif", 30_i32),
+            )
+            .unwrap();
+            let mut chart = chart_with_mesh!(r, 0.0..0.6_f64);
+            let sum_pdf = &pdfs
+                .iter()
+                .map(|x| x[idx])
+                .map(|(x, (a, b, c))| (x, (a + b + c) / stairs.len() as f64));
+
+            chart
+                .draw_series(LineSeries::new(
+                    sum_pdf.clone(),
+                    BLUE.stroke_width(2),
+                ))
+                .unwrap();
+
+            plot_platform_bounds(&chart, r, 0, 35).unwrap();
+
+            plot_stairs(r, &chart, stairs[idx], 0, 35).unwrap();
+
+            sum_pdf.clone().collect()
+        })
+        .collect();
+
+    let all_sum_pdf =
+        sum_pdfs.iter().skip(1).fold(sum_pdfs[0].clone(), |acc, v| {
+            acc.iter()
+                .zip(v)
+                .map(|((x1, y1), (_, y2))| (*x1, y1 + y2))
+                .collect()
+        });
+
+    let r = &right_roots[n_stairs];
+    r.titled("b_2", ("sans-serif", 30_i32))?;
+    let mut chart = chart_with_mesh!(r, 0.0..0.6_f64);
+    chart
+        .draw_series(LineSeries::new(all_sum_pdf, BLUE.stroke_width(2)))
+        .unwrap();
+
+    plot_platform_bounds(&chart, r, 0, 35).unwrap();
+
+    for stair in stairs {
+        plot_stairs(r, &chart, *stair, 0, 35).unwrap();
+    }
+
+    let r = &roots[n_stairs];
+    r.titled("m_1", ("sans-serif", 30_i32))?;
+    let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
+    chart
+        .draw_series(LineSeries::new(prev_pdf.clone(), BLUE.stroke_width(2)))
+        .unwrap();
+
+    plot_platform_bounds(&chart, r, 0, 35).unwrap();
+
+    let r = &roots[n_stairs + 1];
+    r.titled("m_2", ("sans-serif", 30_i32))?;
+    let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
+    chart
+        .draw_series(LineSeries::new(this_pdf.clone(), BLUE.stroke_width(2)))
+        .unwrap();
+
+    for stair in stairs {
+        plot_stairs(r, &chart, *stair, 0, 35).unwrap();
+    }
+    plot_platform_bounds(&chart, r, 0, 35).unwrap();
 
     Ok(())
 }

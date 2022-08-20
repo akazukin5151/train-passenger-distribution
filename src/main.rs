@@ -68,27 +68,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let data = generate_boarding_distributions(&all_station_stairs);
     //let od_pairs = read_od_row();
 
-    //let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
-    //    .iter()
-    //    .enumerate()
-    //    .map(|(idx, _)| {
-    //        (1..=100)
-    //            .map(|x| {
-    //                let y = make_pdf_for_station(
-    //                    &all_station_stairs,
-    //                    &std::iter::repeat(1.0_f64)
-    //                        .take(all_station_stairs.len())
-    //                        .collect::<Vec<_>>(),
-    //                    idx,
-    //                    x as f64 / 100.0,
-    //                );
-    //                (x as f64, y)
-    //            })
-    //            .collect()
-    //    })
-    //    .collect();
+    let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
+        .iter()
+        .enumerate()
+        .map(|(idx, _)| {
+            (1..=100)
+                .map(|x| {
+                    let y = make_pdf_for_station(
+                        &all_station_stairs,
+                        &std::iter::repeat(0.5_f64)
+                            .take(all_station_stairs.len())
+                            .collect::<Vec<_>>(),
+                        idx,
+                        x as f64 / 100.0,
+                    );
+                    (x as f64, y)
+                })
+                .collect()
+        })
+        .collect();
 
-    //plot_pdfs("out/pdfs.png", pdfs)?;
+    plot_pdfs("out/out2.png", &all_station_stairs, pdfs.clone())?;
 
     let x: Vec<Vec<(f64, (f64, f64, f64))>> = (1..=100)
         .map(|x| {
@@ -105,7 +105,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect();
 
-    plot_stair_pdfs_sep("out/pdfs.png", x)?;
+    let prev_pdf = &pdfs[1];
+    let this_pdf = &pdfs[2];
+
+    plot_stair_pdfs_sep(
+        "out/step-by-step2.png",
+        x,
+        &all_station_stairs[2].stair_locations,
+        prev_pdf,
+        this_pdf,
+    )?;
 
     //let tokyo = &data[0];
     //let tokyo_xs = sum_boarding_types(tokyo);

@@ -32,13 +32,35 @@ macro_rules! chart_with_mesh {
     ($root: expr, $y_range: expr) => {{
         let mut chart = basic_chart!($root)
             .margin_top(30_i32)
-            .build_cartesian_2d(-10.0..110.0_f64, $y_range)?;
+            .build_cartesian_2d(-10.0..110.0_f64, $y_range)
+            .unwrap();
 
         chart
             .configure_mesh()
             .axis_desc_style(("sans-serif", 20_i32).into_text_style($root))
             .light_line_style(&WHITE)
-            .draw()?;
+            .draw()
+            .unwrap();
+        chart
+    }};
+}
+
+macro_rules! chart_with_mesh_and_ydesc {
+    ($root: expr, $y_range: expr, $ydesc: expr) => {{
+        let mut chart = basic_chart!($root)
+            .margin_top(30_i32)
+            .build_cartesian_2d(-10.0..110.0_f64, $y_range)
+            .unwrap();
+
+        chart
+            .configure_mesh()
+            .y_desc($ydesc)
+            .axis_desc_style(
+                ("Hiragino Sans GB W3", 20_i32).into_text_style($root),
+            )
+            .light_line_style(&WHITE)
+            .draw()
+            .unwrap();
         chart
     }};
 }
@@ -52,7 +74,7 @@ macro_rules! add_legend {
             .border_style(&BLACK.mix(0.5))
             .legend_area_size(22_i32)
             .label_font(("sans-serif", 20_i32))
-            .draw()?;
+            .draw()
     }};
 }
 
