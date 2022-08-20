@@ -1,8 +1,6 @@
 use crate::data::read_data::*;
 use crate::data::utils::*;
 use crate::types::*;
-use cached::proc_macro::cached;
-use cached::UnboundCache;
 use rand::distributions::Uniform;
 use rand::Rng;
 use rand_distr::Distribution;
@@ -33,7 +31,7 @@ pub fn make_pdf_for_station(
 }
 
 // b
-fn make_boarding_pdf_for_station(
+pub fn make_boarding_pdf_for_station(
     stations: &[StationStairs],
     i: usize,
     x: f64,
@@ -41,12 +39,14 @@ fn make_boarding_pdf_for_station(
     stations[i]
         .stair_locations
         .iter()
-        .map(|stair| stair_pdfs(stair, x))
+        .map(|stair| {
+            stair_pdfs(stair, x) / stations[i].stair_locations.len() as f64
+        })
         .sum()
 }
 
 // S
-fn stair_pdfs(stair: &f64, x: f64) -> f64 {
+pub fn stair_pdfs(stair: &f64, x: f64) -> f64 {
     let prop_normal_far = 0.6;
     let prop_uniform = 0.1;
     let prop_normal_close = 0.3;
@@ -57,9 +57,7 @@ fn stair_pdfs(stair: &f64, x: f64) -> f64 {
     let mean = clamp(*stair) / 100.0;
     let a = beta_(mean, far_concentration, x) * prop_normal_far;
     let b = beta_(mean, close_concentration, x) * prop_normal_close;
-    let c = statrs::distribution::Uniform::new(0.0, 100.)
-        .unwrap()
-        .pdf(x)
+    let c = statrs::distribution::Uniform::new(0.0, 1.).unwrap().pdf(x)
         * prop_uniform;
 
     a + b + c

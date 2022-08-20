@@ -68,15 +68,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let data = generate_boarding_distributions(&all_station_stairs);
     //let od_pairs = read_od_row();
 
-    let x: Vec<Vec<(f64, f64)>> = all_station_stairs
+    let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
         .iter()
         .enumerate()
         .map(|(idx, _)| {
-            (0..=100)
+            (1..=100)
                 .map(|x| {
                     let y = make_pdf_for_station(
                         &all_station_stairs,
-                        &std::iter::repeat(0.3_f64)
+                        &std::iter::repeat(1.0_f64)
                             .take(all_station_stairs.len())
                             .collect::<Vec<_>>(),
                         idx,
@@ -88,7 +88,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect();
 
-    plot_pdfs("out/pdfs.png", x)?;
+    plot_pdfs("out/pdfs.png", pdfs)?;
+
+    //let x: Vec<Vec<(f64, f64)>> = (1..=100)
+    //    .map(|x| {
+    //        all_station_stairs[0]
+    //            .stair_locations
+    //            .iter()
+    //            .map(|stair| {
+    //                let y = stair_pdfs(stair, x as f64 / 100.)
+    //                    / all_station_stairs[0].stair_locations.len() as f64;
+    //                (x as f64, y)
+    //            })
+    //            .collect()
+    //    })
+    //    .collect();
+
+    //plot_stair_pdfs("out/pdfs.png", x)?;
 
     //let tokyo = &data[0];
     //let tokyo_xs = sum_boarding_types(tokyo);
@@ -110,4 +126,3 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
