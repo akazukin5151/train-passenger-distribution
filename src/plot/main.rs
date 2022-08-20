@@ -309,13 +309,24 @@ pub fn plot_pdfs_together(
     let root = BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
-    let mut chart = chart_with_mesh!(&root, 0.0..2.0_f64);
+    let mut chart = basic_chart!(&root)
+        .margin_top(30_i32)
+        .build_cartesian_2d(-10.0..110.0_f64, 0.0..2.0_f64)
+        .unwrap();
+
+    chart
+        .configure_mesh()
+        .x_desc("xpos")
+        .y_desc("density")
+        .axis_desc_style(("sans-serif", 20_i32).into_text_style(&root))
+        .light_line_style(&WHITE)
+        .draw()?;
 
     for ((pdf, color), station) in
         pdfs.iter().zip(COLORS).zip(all_station_stairs)
     {
         chart
-            .draw_series(LineSeries::new(pdf.clone(), color.stroke_width(2)))?
+            .draw_series(LineSeries::new(pdf.clone(), color.stroke_width(3)))?
             .label(&station.station_name)
             .add_legend_icon(color);
     }
