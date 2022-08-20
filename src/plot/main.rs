@@ -134,8 +134,22 @@ pub fn plot_pdfs(
 
     for ((idx, r), station) in roots.iter().enumerate().zip(all_station_stairs)
     {
-        let mut chart =
-            chart_with_mesh_and_ydesc!(r, 0.0..2.0_f64, &station.station_name);
+        r.titled(&station.station_name, ("Hiragino Sans GB W3", 20_i32))?;
+        let mut chart = basic_chart!(r)
+            .margin_top(30_i32)
+            .build_cartesian_2d(-10.0..110.0_f64, 0.0..2.0_f64)
+            .unwrap();
+
+        let mut mesh = chart.configure_mesh();
+        let mesh = mesh
+            .y_desc("density")
+            .axis_desc_style(("sans-serif", 20_i32).into_text_style(r))
+            .light_line_style(&WHITE);
+        if idx == pdfs.len() - 1 {
+            mesh.x_desc("xpos").draw()?;
+        } else {
+            mesh.draw()?;
+        }
 
         for (i, pdf) in pdfs.iter().enumerate() {
             let color = if i == idx {
@@ -147,10 +161,11 @@ pub fn plot_pdfs(
             chart.draw_series(LineSeries::new(pdf.clone(), color))?;
         }
 
-        plot_platform_bounds(&chart, r, 0, 35)?;
+        let modifier = (((192 * idx) as f32) - 0.5) as i32;
+        plot_platform_bounds(&chart, r, modifier, 30)?;
 
         for stair in &station.stair_locations {
-            plot_stairs(r, &chart, *stair, 0, 35).unwrap();
+            plot_stairs(r, &chart, *stair, modifier, 30).unwrap();
         }
     }
 
