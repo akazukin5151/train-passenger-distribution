@@ -1,6 +1,10 @@
 use statrs::distribution::Continuous;
 
-pub fn beta_(mode: f64, concentration: f64, x: f64) -> f64 {
+/// Reformulation of the beta distribution in terms of mode and concentration
+/// Larger concentration means more focused and lower variance
+pub fn beta(mode: f64, concentration: f64, x: f64) -> f64 {
+    assert!((0.0..1.0).contains(&mode));
+    assert!(concentration >= 2.0);
     let alpha = mode * (concentration - 2.0) + 1.0;
     let beta = concentration - alpha;
     statrs::distribution::Beta::new(alpha, beta).unwrap().pdf(x)

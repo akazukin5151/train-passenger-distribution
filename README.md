@@ -87,6 +87,10 @@ The proper way is to use [crowd simulation](https://en.wikipedia.org/wiki/Crowd_
     - https://www.mlit.go.jp/sogoseisaku/transport/sosei_transport_tk_000035.html
     - Processing done by me as part of [directed readings coursework](https://github.com/akazukin5151/papers/blob/main/6SSG3040_CW1_1931393.pdf)
 
+## References
+
+- Kruschke, John K. (2015). Doing Bayesian Data Analysis (Second Edition). Chapter 6.2
+
 ## Q&A
 
 - Why not use Python?

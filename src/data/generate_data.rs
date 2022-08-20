@@ -57,8 +57,8 @@ pub fn stair_pdfs_sep(stair: &f64, x: f64) -> (f64, f64, f64) {
     let close_concentration = 20.;
 
     let mean = clamp(*stair) / 100.0;
-    let a = beta_(mean, far_concentration, x) * prop_normal_far;
-    let b = beta_(mean, close_concentration, x) * prop_normal_close;
+    let a = beta(mean, far_concentration, x) * prop_normal_far;
+    let b = beta(mean, close_concentration, x) * prop_normal_close;
     let c = statrs::distribution::Uniform::new(0.0, 1.).unwrap().pdf(x)
         * prop_uniform;
 
@@ -78,4 +78,3 @@ pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {
         })
         .collect()
 }
-
