@@ -67,20 +67,6 @@ pub fn stair_pdfs_sep(stair: &f64, x: f64) -> (f64, f64, f64) {
     (a, b, c)
 }
 
-pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {
-    stations
-        .iter()
-        .map(|station| StationStairs {
-            station_name: station.to_string(),
-            stair_locations: read_stair_locations(format!(
-                "maps/{}.svg",
-                station
-            ))
-            .unwrap(),
-        })
-        .collect()
-}
-
 pub fn calc_proportion_of_boarders(stations: &[&str]) -> Vec<f64> {
     let link_loads = read_link_load_data();
 

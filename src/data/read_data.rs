@@ -1,4 +1,5 @@
 use crate::data::utils::*;
+use crate::types::StationStairs;
 use csv::StringRecord;
 use std::cmp::Ordering;
 use std::iter;
@@ -64,6 +65,20 @@ pub fn read_stair_locations(
         // if end > start then end is max and start is min
         Ok(standardize_between(end, start, guideline_pos))
     }
+}
+
+pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {
+    stations
+        .iter()
+        .map(|station| StationStairs {
+            station_name: station.to_string(),
+            stair_locations: read_stair_locations(format!(
+                "maps/{}.svg",
+                station
+            ))
+            .unwrap(),
+        })
+        .collect()
 }
 
 /// returns a mapping from lines (String) to stations and their data (Vec<StringRecord>)
