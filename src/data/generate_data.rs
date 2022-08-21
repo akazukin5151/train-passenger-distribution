@@ -4,13 +4,38 @@ use crate::types::*;
 use statrs::distribution::Continuous;
 use statrs::distribution::Uniform;
 
-// m
+pub fn make_pdfs_for_all_stations(
+    all_station_stairs: &[StationStairs],
+    boarder_props: &[f64],
+) -> Vec<Vec<(f64, f64)>> {
+    all_station_stairs
+        .iter()
+        .enumerate()
+        .map(|(idx, _)| {
+            (1..=100)
+                .map(|x| {
+                    let y = make_pdf_for_station(
+                        all_station_stairs,
+                        boarder_props,
+                        idx,
+                        x as f64 / 100.0,
+                    );
+                    (x as f64, y)
+                })
+                .collect()
+        })
+        .collect()
+}
+
+/// m
+// TODO: if it's too slow then memoize it (f64 cannot be hashed but can work around
+// that using loops)
 //#[cached(
 //    type = "UnboundCache<(usize, i32), f64>",
 //    create = "{ UnboundCache::new() }",
 //    convert = " { (i, x) } "
 //)]
-pub fn make_pdf_for_station(
+fn make_pdf_for_station(
     stations: &[StationStairs],
     boarders_props: &[f64],
     i: usize,
@@ -30,7 +55,7 @@ pub fn make_pdf_for_station(
     }
 }
 
-// b
+/// b
 fn make_boarding_pdf_for_station(
     stations: &[StationStairs],
     i: usize,
@@ -45,7 +70,7 @@ fn make_boarding_pdf_for_station(
         .sum()
 }
 
-// S
+/// S
 fn stair_pdfs(stair: &f64, x: f64) -> f64 {
     let (a, b, c) = stair_pdfs_sep(stair, x);
     a + b + c

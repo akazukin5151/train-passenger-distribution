@@ -12,27 +12,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let boarder_props = calc_proportion_of_boarders(&stations);
     dbg!(&boarder_props);
 
-    let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
-        .iter()
-        .enumerate()
-        .map(|(idx, _)| {
-            (1..=100)
-                .map(|x| {
-                    let y = make_pdf_for_station(
-                        &all_station_stairs,
-                        &boarder_props,
-                        idx,
-                        x as f64 / 100.0,
-                    );
-                    (x as f64, y)
-                })
-                .collect()
-        })
-        .collect();
+    let pdfs = make_pdfs_for_all_stations(&all_station_stairs, &boarder_props);
 
     plot_pdfs("out/out.png", &all_station_stairs, pdfs.clone())?;
     plot_pdfs_together("out/together.png", &all_station_stairs, pdfs.clone())?;
 
+    // TODO: duplicated computation. above should do it then combine it
     let x: Vec<Vec<(f64, (f64, f64, f64))>> = (1..=100)
         .map(|x| {
             all_station_stairs[2]
