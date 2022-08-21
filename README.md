@@ -2,7 +2,7 @@
 
 ![kanda](examples/kanda.png)
 
-Simulates the distribution of passengers inside a train along its journey. Higher frequency means higher probability of more people in that section of the train carriage.
+Models the distribution of passengers inside a train along its journey. Higher density means higher probability of more people in that section of the train carriage. This is the probability density function of a mixture distribution.
 
 It assumes that the biggest/only factor in the spatial distribution of passengers is the location of "stairs" (stairs and escalators) on station platforms.
 
@@ -10,7 +10,7 @@ It assumes that the biggest/only factor in the spatial distribution of passenger
 
 Two random beta distributions are generated for every "stair" location, one with a larger and the other a smaller variance. A smaller random uniform distribution is also generated. The three form a mixture distribution and is weighted then summed. The summed pdf for every stair is summed for every station, giving a pdf for boarders at every station. Some passengers in the train will alight whilst some board, so the final distribution after each station is another mixture distribution consisting of the current passengers in the train weighted by the proportion of remaining passengers, plus the boarders.
 
-Origin-destination data is used to model passengers alighting the train cumulatively.
+![out](examples/out.png)
 
 The probability density function *m* of passenger spatial distribution for every station *i* is therefore:
 
@@ -36,11 +36,11 @@ $$S_j=(B_c\times p_o) + (B_f\times p_f) + (U\times p_u)$$
 - $p_o + p_f + p_u = 1$ and all three are >= 0
 - $p_a + p_{1 - a} = 1$ and both are >= 0
 
-The beta distribution is used because it is more appropriate to model proportions (which is bounded between 0-1 exclusive). For values exactly at 0 and 1, it turns it into 0.01 and 0.99 for the beta distribution. The normal distribution would cause edge effects on the boundaries because values outside the boundary was clamped. The alternative was to ignore those values, but that would decrease the number of passengers generated.
+Origin-destination data is used to model passengers alighting the train cumulatively.
 
-![out](examples/out.png)
+The beta distribution is used because it is more appropriate to model proportions (which is bounded between 0-1 exclusive). For values exactly at 0 and 1, it turns it into 0.01 and 0.99 for the beta distribution. The normal distribution would cause edge effects on the boundaries because values outside the boundary was clamped. The alternative was to ignore those values, but that would cause the integral of the "pdf" to be less than 1.
 
-The green lines represents the x-position of the "stairs" for every station. The blue line is the KDE of the spatial distribution of passengers along the 1D train. Observe that there is a slight increase in density around the "stairs".
+The green lines represents the x-position of the "stairs" for every station. The blue line is the probability density function of the spatial distribution of passengers along the 1D train.
 
 As the train moves from Tokyo to Kanda, some passengers alight the train and some board it. Thus the cumulative distribution of the train after Kanda is a mixture of the Tokyo and Kanda distributions. This is why the KDE for Kanda still resembles Tokyo.
 
@@ -50,16 +50,10 @@ Ochanomizu and Yotsuya has "stairs" on the far end of the platform, with the lat
 
 This chart shows the same data but in the same plot for easier inter-station comparison. The density on the left (front of train) after Ochanomizu and Yotsuya is immediately observable.
 
-![smoothed](examples/smoothed.png)
-
-A naive way of modeling passenger dispersion to increase personal space is to increase the bandwidth for the kernel density estimate. This chart increases the bandwidth multiplier, smoothing out small differences, emphasizing focus on broader, larger scale differences. For example, the right-side stairs in Kanda increased passenger density on the right, but then decreases after Ochanomizu and Yotsuya as their stairs are on the left and center of the platform.
-
-The proper way is to use [crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation), but the depth is out of scope for this open source repo. Hopefully it will inspire someone else to dig deeper!
-
 ## Potential extensions
 
 - Proper OD data (the current OD data is probably commuter tickets only)
-- Easily adjustable variables (eg, mean and stdev of beta distributions)
+- Easily adjustable variables
 - [Crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation) to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
 - Consider variables such as shelter (for rainy weather)
 - Consider that some passengers will board at a location convenient for their destination station
