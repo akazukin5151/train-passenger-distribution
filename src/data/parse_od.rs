@@ -16,8 +16,8 @@ pub fn parse_od(od_pairs: &[OdRow], stations: &[&str]) -> Vec<i64> {
 
     // mapping from every station to vector of future stations in the line
     // but extracted the number of people, turning it into
-    // mapping from every station to vector of [people travelling from said station to every
-    // future station]
+    // mapping from every station to vector of
+    // [number of people travelling from said station to every future station]
     let xs: Vec<Vec<i64>> = pairs
         .iter()
         .map(|(from, dests)| {
@@ -26,8 +26,11 @@ pub fn parse_od(od_pairs: &[OdRow], stations: &[&str]) -> Vec<i64> {
                 .filter_map(|to| {
                     od_pairs.iter().find(|row| {
                         (row.stations.len() == 1 && row.stations[0] == "[]")
-                            && (row.from_station_code == ***from
+                            && ((row.from_station_code == ***from
                                 && row.to_station_code == ***to)
+                                // TODO
+                                || (row.to_station_code == ***from
+                                    && row.from_station_code == ***to))
                     })
                 })
                 .map(|x| x.count)
@@ -37,12 +40,68 @@ pub fn parse_od(od_pairs: &[OdRow], stations: &[&str]) -> Vec<i64> {
 
     assert!(xs.len() == stations.len());
 
-    // total number of people at every line section
-    // xs[0] = number of people going from 1st station to 2nd station + 1st to 3rd, ...
-    // xs[1] = number of people going from 2nd station to 3rd station + 2nd to 4th, ...
-    let xs: Vec<i64> = xs.iter().map(|vec| vec.iter().sum()).collect();
+    // the length of the inner vectors decrease by one after every station
+    // the first station has n_stations - 1 items, because no passengers are travelling
+    // from the first to the first; only from first to second and so on.
+    // thus the first station's vector excludes itself, the second stations'
+    // excludes the first station (which the train has already passed)
+    // plus itself.
+    assert!(
+        xs.iter().map(|ys| ys.len()).collect::<Vec<_>>()
+            == (0..stations.len()).rev().collect::<Vec<_>>()
+    );
 
-    assert!(xs.len() == stations.len());
+    // the len is stations.len() - 1 because first station's inner vec excludes itself
+    let mut n_alighters_at_every_station: Vec<i64> = vec![0];
+    n_alighters_at_every_station.extend(transpose_sum(xs[0].len(), &xs));
 
-    xs
+    assert!(n_alighters_at_every_station.len() == stations.len());
+
+    n_alighters_at_every_station
+}
+
+pub fn transpose_sum(max_i: usize, xs: &[Vec<i64>]) -> Vec<i64> {
+    let x: Vec<Vec<&i64>> = xs
+        .iter()
+        .map(|vec| {
+            let mut v: Vec<_> = vec.iter().rev().collect();
+            while v.len() < max_i {
+                v.push(&0)
+            }
+            v
+        })
+        .collect();
+
+    (0..max_i)
+        .map(|idx| {
+            let mut res = 0_i64;
+            for item in &x {
+                res += item[idx];
+            }
+            res
+        })
+        .rev()
+        .collect()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[rustfmt::skip]
+    fn input() -> Vec<Vec<i64>> {
+        vec![
+            vec![1, 5, 2, 7],
+               vec![9, 3, 7],
+                  vec![6, 2],
+                     vec![7]
+        ]
+    }
+
+    #[test]
+    fn test_transpose_sum() {
+        let xs = input();
+        let res = transpose_sum(xs[0].len(), &xs);
+        assert_eq!(res, vec![1, 14, 11, 23])
+    }
 }

@@ -1,6 +1,8 @@
 use crate::data::utils::*;
 use crate::types::*;
+use csv::StringRecord;
 use std::cmp::Ordering;
+use std::iter;
 use std::ops::Deref;
 use svg::parser::Event;
 
@@ -75,4 +77,51 @@ pub fn read_od_row() -> Vec<OdRow> {
         }
     }
     records
+}
+
+/// returns a mapping from lines (String) to stations and their data (Vec<StringRecord>)
+pub fn read_link_load_data() -> Vec<(String, Vec<StringRecord>)> {
+    let mut rdr = csv::Reader::from_path("data/001178992.csv").unwrap();
+    let mut records = vec![];
+    for result in rdr.records() {
+        let record = result;
+        if let Ok(r) = record {
+            records.push(r);
+        }
+    }
+
+    // add an empty row in the front so that partitioning works
+    let first_line = StringRecord::from(
+        iter::repeat("").take(records[0].len()).collect::<Vec<_>>(),
+    );
+    let mut r = vec![first_line];
+    r.extend(records);
+    let records = r;
+
+    // partition line rows and station rows (and remove total rows)
+    let mut result = vec![];
+    for record in records {
+        // if record is empty vec then exclude this row anyway
+        let is_total_row =
+            record.get(0).map(|string| string == "合計").unwrap_or(true);
+
+        if record.iter().all(|string| string.is_empty()) {
+            result.push(vec![]);
+        } else if !is_total_row {
+            let l = result.len() - 1;
+            let last_vec = &mut result[l];
+            last_vec.push(record);
+        }
+    }
+
+    // turn results into (line, stations-in-this-line)
+    result
+        .iter()
+        .map(|vec| {
+            (
+                vec[0].get(0).unwrap().to_string(),
+                vec.iter().skip(1).cloned().collect::<Vec<_>>(),
+            )
+        })
+        .collect()
 }

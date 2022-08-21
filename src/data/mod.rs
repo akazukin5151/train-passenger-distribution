@@ -5,4 +5,4 @@ mod utils;
 
 pub use generate_data::*;
 pub use parse_od::parse_od;
-pub use read_data::read_od_row;
+pub use read_data::*;

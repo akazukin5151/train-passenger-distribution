@@ -23,10 +23,8 @@ const CHUO_STATIONS: &[&str] = &[
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let stations = vec!["東京", "神田", "御茶ノ水", "四ッ谷"];
-    let all_station_stairs = read_station_stairs(stations);
-    let od_pairs = read_od_row();
-    let xs = parse_od(&od_pairs, CHUO_STATIONS);
-    dbg!(xs);
+    let all_station_stairs = read_station_stairs(stations.clone());
+    let boarder_props = calc_proportion_of_boarders(&stations);
 
     let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
         .iter()
@@ -36,10 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .map(|x| {
                     let y = make_pdf_for_station(
                         &all_station_stairs,
-                        // TODO
-                        &std::iter::repeat(0.5_f64)
-                            .take(all_station_stairs.len())
-                            .collect::<Vec<_>>(),
+                        &boarder_props,
                         idx,
                         x as f64 / 100.0,
                     );
