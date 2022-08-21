@@ -9,7 +9,7 @@ use plot::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let stations = vec!["東京", "神田", "御茶ノ水", "四ッ谷"];
     let all_station_stairs = read_station_stairs(stations);
-    //let od_pairs = read_od_row();
+    let od_pairs = read_od_row();
 
     let pdfs: Vec<Vec<(f64, f64)>> = all_station_stairs
         .iter()
