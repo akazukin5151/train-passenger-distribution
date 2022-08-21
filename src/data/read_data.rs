@@ -1,5 +1,4 @@
 use crate::data::utils::*;
-use crate::types::*;
 use csv::StringRecord;
 use std::cmp::Ordering;
 use std::iter;
@@ -65,18 +64,6 @@ pub fn read_stair_locations(
         // if end > start then end is max and start is min
         Ok(standardize_between(end, start, guideline_pos))
     }
-}
-
-pub fn read_od_row() -> Vec<OdRow> {
-    let mut rdr = csv::Reader::from_path("data/out.csv").unwrap();
-    let mut records = vec![];
-    for result in rdr.deserialize() {
-        let record: Result<OdRow, _> = result;
-        if let Ok(r) = record {
-            records.push(r);
-        }
-    }
-    records
 }
 
 /// returns a mapping from lines (String) to stations and their data (Vec<StringRecord>)

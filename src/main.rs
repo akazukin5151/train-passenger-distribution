@@ -6,21 +6,6 @@ mod types;
 use data::*;
 use plot::*;
 
-const CHUO_STATIONS: &[&str] = &[
-    "東京",
-    "神田",
-    "御茶ノ水",
-    "四ッ谷",
-    "新宿",
-    "中野",
-    "高円寺",
-    "阿佐ヶ谷",
-    "荻窪",
-    "西荻窪",
-    "吉祥寺",
-    "三鷹",
-];
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let stations = vec!["東京", "神田", "御茶ノ水", "四ッ谷"];
     let all_station_stairs = read_station_stairs(stations.clone());
