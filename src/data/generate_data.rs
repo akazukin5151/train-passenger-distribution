@@ -2,6 +2,7 @@ use crate::data::read_data::*;
 use crate::data::utils::*;
 use crate::types::*;
 use statrs::distribution::Continuous;
+use statrs::distribution::Uniform;
 
 // m
 //#[cached(
@@ -30,7 +31,7 @@ pub fn make_pdf_for_station(
 }
 
 // b
-pub fn make_boarding_pdf_for_station(
+fn make_boarding_pdf_for_station(
     stations: &[StationStairs],
     i: usize,
     x: f64,
@@ -45,7 +46,7 @@ pub fn make_boarding_pdf_for_station(
 }
 
 // S
-pub fn stair_pdfs(stair: &f64, x: f64) -> f64 {
+fn stair_pdfs(stair: &f64, x: f64) -> f64 {
     let (a, b, c) = stair_pdfs_sep(stair, x);
     a + b + c
 }
@@ -61,8 +62,7 @@ pub fn stair_pdfs_sep(stair: &f64, x: f64) -> (f64, f64, f64) {
     let mean = clamp(*stair) / 100.0;
     let a = beta(mean, far_concentration, x) * prop_normal_far;
     let b = beta(mean, close_concentration, x) * prop_normal_close;
-    let c = statrs::distribution::Uniform::new(0.0, 1.).unwrap().pdf(x)
-        * prop_uniform;
+    let c = Uniform::new(0.0, 1.).unwrap().pdf(x) * prop_uniform;
 
     (a, b, c)
 }
