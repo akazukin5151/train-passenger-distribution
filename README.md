@@ -1,6 +1,6 @@
 # Cumulative distribution of train passengers
 
-![kanda](examples/kanda.png)
+![ochanomizu](examples/ochanomizu.png)
 
 Models the distribution of passengers inside a train along its journey. Higher density means higher probability of more people in that section of the train carriage. This is the probability density function of a mixture distribution.
 
