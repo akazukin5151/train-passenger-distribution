@@ -81,7 +81,7 @@ pub fn read_station_stairs(stations: Vec<&str>) -> Vec<StationStairs> {
         .collect()
 }
 
-pub fn calc_proportion_of_boarders(stations: &Vec<&str>) -> Vec<f64> {
+pub fn calc_proportion_of_boarders(stations: &[&str]) -> Vec<f64> {
     let link_loads = read_link_load_data();
 
     let line_loads: &Vec<_> = &link_loads

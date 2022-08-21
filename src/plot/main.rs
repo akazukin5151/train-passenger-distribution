@@ -12,7 +12,7 @@ pub const COLORS: [RGBColor; 4] = [
 
 pub fn plot_pdfs(
     filename: &str,
-    all_station_stairs: &Vec<StationStairs>,
+    all_station_stairs: &[StationStairs],
     pdfs: Vec<Vec<(f64, f64)>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
@@ -63,9 +63,9 @@ pub fn plot_pdfs(
 pub fn plot_stair_pdfs_sep(
     filename: &str,
     pdfs: Vec<Vec<(f64, (f64, f64, f64))>>,
-    stairs: &Vec<f64>,
-    prev_pdf: &Vec<(f64, f64)>,
-    this_pdf: &Vec<(f64, f64)>,
+    stairs: &[f64],
+    prev_pdf: &[(f64, f64)],
+    this_pdf: &[(f64, f64)],
 ) -> Result<(), Box<dyn std::error::Error>> {
     let n_stairs = stairs.len();
 
@@ -169,7 +169,7 @@ pub fn plot_stair_pdfs_sep(
     r.titled("PDF of Kanda (m_1)", ("sans-serif", 30_i32))?;
     let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
     chart
-        .draw_series(LineSeries::new(prev_pdf.clone(), BLUE.stroke_width(2)))
+        .draw_series(LineSeries::new(prev_pdf.to_owned(), BLUE.stroke_width(2)))
         .unwrap();
 
     plot_platform_bounds(&chart, r, 0, 35).unwrap();
@@ -178,7 +178,7 @@ pub fn plot_stair_pdfs_sep(
     r.titled("PDF of Ochanomizu (m_2)", ("sans-serif", 30_i32))?;
     let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
     chart
-        .draw_series(LineSeries::new(this_pdf.clone(), BLUE.stroke_width(2)))
+        .draw_series(LineSeries::new(this_pdf.to_owned(), BLUE.stroke_width(2)))
         .unwrap();
 
     for stair in stairs {
@@ -191,7 +191,7 @@ pub fn plot_stair_pdfs_sep(
 
 pub fn plot_pdfs_together(
     filename: &str,
-    all_station_stairs: &Vec<StationStairs>,
+    all_station_stairs: &[StationStairs],
     pdfs: Vec<Vec<(f64, f64)>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(filename, (1024, 768)).into_drawing_area();
