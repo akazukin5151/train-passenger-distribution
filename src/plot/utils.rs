@@ -4,6 +4,8 @@ use plotters::coord::types::RangedCoordf64;
 use plotters::coord::Shift;
 use plotters::prelude::*;
 
+pub const SUBSCRIPTS: &[&str] = &["₁", "₂", "₃", "₄"];
+
 pub type Chart<'a, 'b> = ChartContext<
     'a,
     BitMapBackend<'b>,
@@ -104,3 +106,4 @@ impl Ext for SeriesAnno<'_, BitMapBackend<'_>> {
         });
     }
 }
+

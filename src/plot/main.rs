@@ -115,9 +115,9 @@ pub fn plot_stair_pdfs_sep(
         .map(|(idx, r)| {
             r.titled(
                 &format!(
-                    "All passengers boarding at Ochanomizu stair #{} (S_{}/{})",
+                    "All passengers boarding at Ochanomizu stair #{} (S{}/{})",
                     idx + 1,
-                    idx + 1,
+                    SUBSCRIPTS[idx],
                     n_stairs
                 ),
                 ("sans-serif", 30_i32),
@@ -153,7 +153,10 @@ pub fn plot_stair_pdfs_sep(
         });
 
     let r = &right_roots[n_stairs];
-    r.titled("All boarders at Ochanomizu (b_2)", ("sans-serif", 30_i32))?;
+    r.titled(
+        &format!("All boarders at Ochanomizu (b{})", SUBSCRIPTS[1]),
+        ("sans-serif", 30_i32),
+    )?;
     let mut chart = chart_with_mesh!(r, 0.0..0.6_f64);
     chart
         .draw_series(LineSeries::new(all_sum_pdf, BLUE.stroke_width(2)))
@@ -166,7 +169,10 @@ pub fn plot_stair_pdfs_sep(
     }
 
     let r = &roots[n_stairs];
-    r.titled("PDF of Kanda (m_1)", ("sans-serif", 30_i32))?;
+    r.titled(
+        &format!("PDF of Kanda (m{})", SUBSCRIPTS[0]),
+        ("sans-serif", 30_i32),
+    )?;
     let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
     chart
         .draw_series(LineSeries::new(prev_pdf.to_owned(), BLUE.stroke_width(2)))
@@ -175,7 +181,10 @@ pub fn plot_stair_pdfs_sep(
     plot_platform_bounds(&chart, r, 0, 35).unwrap();
 
     let r = &roots[n_stairs + 1];
-    r.titled("PDF of Ochanomizu (m_2)", ("sans-serif", 30_i32))?;
+    r.titled(
+        &format!("PDF of Ochanomizu (m{})", SUBSCRIPTS[1]),
+        ("sans-serif", 30_i32),
+    )?;
     let mut chart = chart_with_mesh!(r, 0.0..2.0_f64);
     chart
         .draw_series(LineSeries::new(this_pdf.to_owned(), BLUE.stroke_width(2)))
