@@ -14,16 +14,16 @@ Two random beta distributions are generated for every "stair" location, one with
 
 The probability density function *m* of passenger spatial distribution for every station *i* is therefore:
 
-$$m_0=b_i\times p_a$$
+$$m_0=b_i$$
 
-$$m_i=(m_{i-1}\times p_{1-a})+(b_i\times p_a)$$
+$$m_i=(m_{i-1}\times p_{1-b})+(b_i\times p_b)$$
 
 $$b_i=\sum_{j=0}^{n_j}\frac{S_j}{n_j}$$
 
 $$S_j=(B_c\times p_o) + (B_f\times p_f) + (U\times p_u)$$
 
 - $b_i$ is the distribution of passengers boarding the train at station $i$
-- $p_a$ is the proportion of passengers alighting at station $i$
+- $p_b$ is the proportion of passengers boarding at station $i$
 - $j$ is the j-th stair at station $i$
 - $n_j$ is the number of stairs at station $i$
 - $S_j$ is the distribution of boarders coming from stair $j$
