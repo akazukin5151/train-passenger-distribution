@@ -32,7 +32,6 @@ $$S_j=(B_c\times p_o) + (B_f\times p_f) + (U\times p_u)$$
 - $p_o$ is the proportion of boarders from a particular stair with the small variance spatial process
 - $p_f$ is the proportion of boarders from a particular stair with the far variance spatial process
 - $p_u$ is the proportion of boarders from a particular stair with the uniform random spatial process
-
 - $p_o + p_f + p_u = 1$ and all three are >= 0
 - $p_a + p_{1 - a} = 1$ and both are >= 0
 
