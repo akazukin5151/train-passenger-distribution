@@ -14,7 +14,7 @@ Two random beta distributions are generated for every "stair" location, one with
 
 The probability density function *m* of passenger spatial distribution for every station *i* is therefore:
 
-$$m_0=b_i$$
+$$m_0=b_0$$
 
 $$m_i=(m_{i-1}\times p_{1-b})+(b_i\times p_b)$$
 
@@ -33,7 +33,7 @@ $$S_j=(B_c\times p_o) + (B_f\times p_f) + (U\times p_u)$$
 - $p_f$ is the proportion of boarders from a particular stair with the far variance spatial process
 - $p_u$ is the proportion of boarders from a particular stair with the uniform random spatial process
 - $p_o + p_f + p_u = 1$ and all three are >= 0
-- $p_a + p_{1 - a} = 1$ and both are >= 0
+- $p_b + p_{1 - b} = 1$ and both are >= 0
 
 Origin-destination data is used to model passengers alighting the train cumulatively.
 
