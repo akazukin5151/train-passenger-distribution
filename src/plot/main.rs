@@ -190,10 +190,11 @@ pub fn plot_stair_pdfs_sep(
         .draw_series(LineSeries::new(this_pdf.to_owned(), BLUE.stroke_width(2)))
         .unwrap();
 
+    plot_platform_bounds(&chart, r, 0, 35).unwrap();
+
     for stair in stairs {
         plot_stairs(r, &chart, *stair, 0, 35).unwrap();
     }
-    plot_platform_bounds(&chart, r, 0, 35).unwrap();
 
     Ok(())
 }
