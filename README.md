@@ -12,6 +12,8 @@ It assumes that the biggest/only factor in the spatial distribution of passenger
 
 Two random beta distributions are generated for every "stair" location, one with a larger and the other a smaller variance. A smaller random uniform distribution is also generated. The three form a mixture distribution and is weighted then summed. The summed pdf for every stair is summed for every station, giving a pdf for boarders at every station. Some passengers in the train will alight whilst some board, so the final distribution after each station is another mixture distribution consisting of the current passengers in the train weighted by the proportion of remaining passengers, plus the boarders.
 
+The bright green lines represents the x-position of the stairs for every station. The colored lines are the probability density function of the spatial distribution of passengers along the 1D train.
+
 ![out](examples/out.png)
 
 The probability density function *m* of passenger spatial distribution for every station *i* is therefore:
@@ -22,7 +24,7 @@ $$m_i=(m_{i-1}\times p_{1-b})+(b_i\times p_b)$$
 
 $$b_i=\sum_{j=0}^{n_j}\frac{S_j}{n_j}$$
 
-$$S_j=(B_c\times p_o) + (B_f\times p_f) + (U\times p_u)$$
+$$S_j=(B_c\times p_c) + (B_f\times p_f) + (U\times p_u)$$
 
 - $b_i$ is the distribution of passengers boarding the train at station $i$
 - $p_b$ is the proportion of passengers boarding at station $i$
@@ -31,21 +33,25 @@ $$S_j=(B_c\times p_o) + (B_f\times p_f) + (U\times p_u)$$
 - $S_j$ is the distribution of boarders coming from stair $j$
 - $B$ is the pdf of the beta distribution; $B_c$ means with a small variance and $B_f$ means a large variance
 - $U$ is the pdf of the uniform distribution (supported on the platform boundaries)
-- $p_o$ is the proportion of boarders from a particular stair with the small variance spatial process
+- $p_c$ is the proportion of boarders from a particular stair with the small variance spatial process
 - $p_f$ is the proportion of boarders from a particular stair with the far variance spatial process
 - $p_u$ is the proportion of boarders from a particular stair with the uniform random spatial process
-- $p_o + p_f + p_u = 1$ and all three are >= 0
+- $p_c + p_f + p_u = 1$ and all three are >= 0
 - $p_b + p_{1 - b} = 1$ and both are >= 0
 
-Origin-destination data is used to model passengers alighting the train cumulatively.
+This assumes each stair in the station is uniformly important, but this might not be true, as some passengers might be predominantly from particular stairs. The equation can be easily adapted to support data for stair traffic:
+
+$$b_i=\sum_{j=0}^{n_j}\frac{S_j}{p_j}$$
+
+Where $p_j$ is the probability of passengers coming from stair $j$. $\sum_{j=0}^{n_j}p_j$ must equal 1
 
 The beta distribution is used because it is more appropriate to model proportions (which is bounded between 0-1 exclusive). For values exactly at 0 and 1, it turns it into 0.01 and 0.99 for the beta distribution. The normal distribution would cause edge effects on the boundaries because values outside the boundary was clamped. The alternative was to ignore those values, but that would cause the integral of the "pdf" to be less than 1.
 
-The green lines represents the x-position of the "stairs" for every station. The blue line is the probability density function of the spatial distribution of passengers along the 1D train.
+Origin-destination data is used to model passengers alighting the train cumulatively.
 
 As the train moves from Tokyo to Kanda, some passengers alight the train and some board it. Thus the cumulative distribution of the train after Kanda is a mixture of the Tokyo and Kanda distributions. This is why the KDE for Kanda still resembles Tokyo.
 
-Ochanomizu and Yotsuya has "stairs" on the far end of the platform, with the latter actually beyond the train carriage. The result is an increase in the density of passengers on the left side of the train.
+Ochanomizu and Yotsuya has stairs on the far end of the platform, with the latter actually beyond the train carriage. The result is an increase in the density of passengers on the left side of the train.
 
 ![together](examples/together.png)
 
