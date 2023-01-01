@@ -30,18 +30,25 @@ $$S_j=(B_c\times p_c) + (B_f\times p_f) + (U\times p_u)$$
 - $p_b$ is the proportion of total passengers that are boarders from station $i$
     - The remaining passengers are passengers alighting at station $i$
     - This means the current implementation models alighting passengers with a uniform distribution
+    - Calculated from link load data
 - $j$ is the j-th stair at station $i$
 - $n_j$ is the number of stairs at station $i$
+    - Data from station platform layout map from the JR website
 - $S_j$ is the distribution of boarders coming from stair $j$
 - $B$ is the pdf of the beta distribution; $B_c$ means with a small variance and $B_f$ means a large variance
 - $U$ is the pdf of the uniform distribution (supported on the platform boundaries)
 - $p_c$ is the proportion of boarders from a particular stair with the small variance spatial process
+    - close_concentration = 20.
+    - prop_normal_close = 0.3
 - $p_f$ is the proportion of boarders from a particular stair with the far variance spatial process
+    - far_concentration = 7.
+    - prop_normal_far = 0.6
 - $p_u$ is the proportion of boarders from a particular stair with the uniform random spatial process
+    - prop_uniform = 0.1
 - $p_c + p_f + p_u = 1$ and all three are >= 0
 - $p_b + p_{1 - b} = 1$ and both are >= 0
 
-This assumes each stair in the station is uniformly important, but this might not be true, as some passengers might be predominantly from particular stairs. The equation can be easily adapted to support data for stair traffic:
+This assumes each stair in the station is equally important, but this might not be true, as some passengers might be predominantly from particular stairs. The equation can be easily adapted to support data for stair traffic:
 
 $$b_i=\sum_{j=0}^{n_j}\frac{S_j}{p_j}$$
 
@@ -62,7 +69,7 @@ This chart shows the same data but in the same plot for easier inter-station com
 ## Potential extensions
 
 - Proper OD data (the current OD data is probably commuter tickets only)
-- Easily adjustable variables
+- Easily adjustable variables (the parameters used for the beta distributions and their weight is hardcoded in `stair_pdfs_sep` as above)
 - [Crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation) to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
 - Consider that some alighting passengers will exit at a location close to the stairs they plan to go through (currently a uniform distribution is subtracted)
 - Consider that some passengers will board at a location convenient for their destination station
