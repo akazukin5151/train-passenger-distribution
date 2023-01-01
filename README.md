@@ -30,7 +30,7 @@ $$S_j=(B_c\times p_c) + (B_f\times p_f) + (U\times p_u)$$
 - $p_b$ is the proportion of total passengers that are boarders from station $i$
     - The remaining passengers are passengers alighting at station $i$
     - This means the current implementation models alighting passengers with a uniform distribution
-    - Calculated from link load data
+    - Calculated from link load (origin-destination) data
 - $j$ is the j-th stair at station $i$
 - $n_j$ is the number of stairs at station $i$
     - Data from station platform layout map from the JR website
@@ -56,8 +56,6 @@ Where $p_j$ is the probability of passengers coming from stair $j$. $\sum_{j=0}^
 
 The beta distribution is used because it is more appropriate to model proportions (which is bounded between 0-1 exclusive). For values exactly at 0 and 1, it turns it into 0.01 and 0.99 for the beta distribution. The normal distribution would cause edge effects on the boundaries because values outside the boundary was clamped. The alternative was to ignore those values, but that would cause the integral of the "pdf" to be less than 1.
 
-Origin-destination data is used to model passengers alighting the train cumulatively.
-
 As the train moves from Tokyo to Kanda, some passengers alight the train and some board it. Thus the cumulative distribution of the train after Kanda is a mixture of the Tokyo and Kanda distributions. This is why the KDE for Kanda still resembles Tokyo.
 
 Ochanomizu and Yotsuya has stairs on the far end of the platform, with the latter actually beyond the train carriage. The result is an increase in the density of passengers on the left side of the train.
@@ -68,13 +66,13 @@ This chart shows the same data but in the same plot for easier inter-station com
 
 ## Potential extensions
 
-- Proper OD data (the current OD data is probably commuter tickets only)
 - Easily adjustable variables (the parameters used for the beta distributions and their weight is hardcoded in `stair_pdfs_sep` as above)
-- [Crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation) to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
 - Consider that some alighting passengers will exit at a location close to the stairs they plan to go through (currently a uniform distribution is subtracted)
 - Consider that some passengers will board at a location convenient for their destination station
 - Consider variables such as shelter (for rainy weather)
+- Proper origin-destination data (the current OD data is probably commuter tickets only)
 - Evaluate model with real world data of passenger distributions
+- [Crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation) to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
 
 ## Applications
 
@@ -95,9 +93,8 @@ This chart shows the same data but in the same plot for easier inter-station com
 - Station platform layout
     - https://www.jreast.co.jp/map/
     - eg: https://www.jreast.co.jp/estation/stations/1039.html
-- Origin-destination data
+- Link load (origin-destination) data
     - https://www.mlit.go.jp/sogoseisaku/transport/sosei_transport_tk_000035.html
-    - Processing done by me as part of [directed readings coursework](https://github.com/akazukin5151/papers/blob/main/6SSG3040_CW1_1931393.pdf)
 
 ## References
 
