@@ -39,7 +39,7 @@ $$S_j=(B_c\times p_c) + (B_f\times p_f) + (U\times p_u)$$
 - $b_i$ is the distribution of passengers boarding the train at station $i$
 - $p^b_i$ is the proportion of total passengers that are boarders from station $i$
     - The current implementation models alighting passengers with a uniform distribution
-    - $1 - p^b_i$ are passengers alighting at station $i$
+    - $1 - p^b_i$ is the proportion of passengers alighting at station $i$
     - Calculated from link load (origin-destination) data
     - $p^b_i + (1 - p^b_i) = 1$ and both are >= 0
 - $j$ is the j-th stair at station $i$
