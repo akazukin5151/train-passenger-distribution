@@ -114,8 +114,8 @@ pub fn calc_proportion_of_boarders(stations: &[&str]) -> Vec<f64> {
         .iter()
         .map(|row| row[2].replace(',', "").parse::<i64>().unwrap());
 
-    // manually calculating cumulative here (even though (part of) it is already
-    // in the third column, because some stations might have to be excluded)
+    // manually calculating cumulative here, even though (part of) it is already
+    // in the third column, to prevent cumulative[0 - 1]
     let difference = boardings.clone().zip(alightings).map(|(a, b)| a - b);
     let mut cumulative = vec![];
     for (idx, diff) in difference.enumerate() {

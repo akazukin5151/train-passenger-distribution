@@ -27,7 +27,9 @@ $$b_i=\sum_{j=0}^{n_j}\frac{S_j}{n_j}$$
 $$S_j=(B_c\times p_c) + (B_f\times p_f) + (U\times p_u)$$
 
 - $b_i$ is the distribution of passengers boarding the train at station $i$
-- $p_b$ is the proportion of passengers boarding at station $i$
+- $p_b$ is the proportion of total passengers that are boarders from station $i$
+    - The remaining passengers are passengers alighting at station $i$
+    - This means the current implementation models alighting passengers with a uniform distribution
 - $j$ is the j-th stair at station $i$
 - $n_j$ is the number of stairs at station $i$
 - $S_j$ is the distribution of boarders coming from stair $j$
@@ -62,15 +64,17 @@ This chart shows the same data but in the same plot for easier inter-station com
 - Proper OD data (the current OD data is probably commuter tickets only)
 - Easily adjustable variables
 - [Crowd simulation](https://en.wikipedia.org/wiki/Crowd_simulation) to model passengers dispersing throughout the train, as passengers do not mindlessly cluster together when there is space along the train
-- Consider variables such as shelter (for rainy weather)
+- Consider that some alighting passengers will exit at a location close to the stairs they plan to go through (currently a uniform distribution is subtracted)
 - Consider that some passengers will board at a location convenient for their destination station
+- Consider variables such as shelter (for rainy weather)
 - Evaluate model with real world data of passenger distributions
 
 ## Applications
 
 - Suggest passengers where to wait to mitigate overcrowding
-- Understand spatial processes of people in transit through detailed slices of time
+- Pricing advertisements on the platform based on crowd sizes
 - Inform future station layout design
+- Understand spatial processes of people in transit through detailed slices of time
 - As a replacement for lack of real world measurements of passengers distributions
 
 ## Usage
