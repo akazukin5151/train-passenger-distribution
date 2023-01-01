@@ -4,33 +4,44 @@
 
 ![ochanomizu](examples/ochanomizu.png)
 
-Models the distribution of passengers inside a train along its journey. Higher density means higher probability of more people in that section of the train carriage. This is the probability density function of a mixture distribution.
+Models the distribution of passengers inside a train along its journey. Higher density means higher probability of people in that position of the train carriage. This is the probability density function of a mixture distribution.
 
 It assumes that the biggest/only factor in the spatial distribution of passengers is the location of "stairs" (stairs and escalators) on station platforms.
 
 ![step-by-step](examples/step-by-step.png)
 
-Two random beta distributions are generated for every "stair" location, one with a larger and the other a smaller variance. A smaller random uniform distribution is also generated. The three form a mixture distribution and is weighted then summed. The summed pdf for every stair is summed for every station, giving a pdf for boarders at every station. Some passengers in the train will alight whilst some board, so the final distribution after each station is another mixture distribution consisting of the current passengers in the train weighted by the proportion of remaining passengers, plus the boarders.
+Two random beta distributions are generated for every "stair" location, one with a larger and the other a smaller variance. A smaller random uniform distribution is also generated. The three form a mixture distribution and is weighted then summed. The summed pdf for every stair is summed for every station, giving a pdf for boarders at every station. Some passengers in the train will alight whilst some board, so the final distribution after each station is another mixture distribution consisting of the distribution of current passengers in the train, plus the distribution of all boarders, minus the distribution of alighting passengers. For simplicity, the distribution of alighting passengers are assumed to be uniform.
 
 The bright green lines represents the x-position of the stairs for every station. The colored lines are the probability density function of the spatial distribution of passengers along the 1D train.
 
 ![out](examples/out.png)
 
-The probability density function *m* of passenger spatial distribution for every station *i* is therefore:
+As the train moves from Tokyo to Kanda, some passengers alight the train and some board it. Thus the cumulative distribution of the train after Kanda is a mixture of the Tokyo and Kanda distributions. This is why the KDE for Kanda still resembles Tokyo.
+
+Ochanomizu and Yotsuya has stairs on the far end of the platform, with the latter actually beyond the train carriage. The result is an increase in the density of passengers on the left side of the train.
+
+![together](examples/together.png)
+
+This chart shows the same data but in the same plot for easier inter-station comparison. The density on the left (front of train) after Ochanomizu and Yotsuya is immediately observable.
+
+## Equations
+
+The probability density function *m* of passenger spatial distribution for every station *i* is:
 
 $$m_0=b_0$$
 
-$$m_i=(m_{i-1}\times p_{1-b})+(b_i\times p_b)$$
+$$m_i=(m_{i-1}\times (1 - p^b_i))+(b_i\times p^b_i)$$
 
 $$b_i=\sum_{j=0}^{n_j}\frac{S_j}{n_j}$$
 
 $$S_j=(B_c\times p_c) + (B_f\times p_f) + (U\times p_u)$$
 
 - $b_i$ is the distribution of passengers boarding the train at station $i$
-- $p_b$ is the proportion of total passengers that are boarders from station $i$
-    - The remaining passengers are passengers alighting at station $i$
-    - This means the current implementation models alighting passengers with a uniform distribution
+- $p^b_i$ is the proportion of total passengers that are boarders from station $i$
+    - The current implementation models alighting passengers with a uniform distribution
+    - $1 - p^b_i$ are passengers alighting at station $i$
     - Calculated from link load (origin-destination) data
+    - $p^b_i + (1 - p^b_i) = 1$ and both are >= 0
 - $j$ is the j-th stair at station $i$
 - $n_j$ is the number of stairs at station $i$
     - Data from station platform layout map from the JR website
@@ -40,13 +51,12 @@ $$S_j=(B_c\times p_c) + (B_f\times p_f) + (U\times p_u)$$
 - $p_c$ is the proportion of boarders from a particular stair with the small variance spatial process
     - close_concentration = 20.
     - prop_normal_close = 0.3
-- $p_f$ is the proportion of boarders from a particular stair with the far variance spatial process
+- $p_f$ is the proportion of boarders from a particular stair with the large variance spatial process
     - far_concentration = 7.
     - prop_normal_far = 0.6
 - $p_u$ is the proportion of boarders from a particular stair with the uniform random spatial process
     - prop_uniform = 0.1
 - $p_c + p_f + p_u = 1$ and all three are >= 0
-- $p_b + p_{1 - b} = 1$ and both are >= 0
 
 This assumes each stair in the station is equally important, but this might not be true, as some passengers might be predominantly from particular stairs. The equation can be easily adapted to support data for stair traffic:
 
@@ -55,14 +65,6 @@ $$b_i=\sum_{j=0}^{n_j}\frac{S_j}{p_j}$$
 Where $p_j$ is the probability of passengers coming from stair $j$. $\sum_{j=0}^{n_j}p_j$ must equal 1
 
 The beta distribution is used because it is more appropriate to model proportions (which is bounded between 0-1 exclusive). For values exactly at 0 and 1, it turns it into 0.01 and 0.99 for the beta distribution. The normal distribution would cause edge effects on the boundaries because values outside the boundary was clamped. The alternative was to ignore those values, but that would cause the integral of the "pdf" to be less than 1.
-
-As the train moves from Tokyo to Kanda, some passengers alight the train and some board it. Thus the cumulative distribution of the train after Kanda is a mixture of the Tokyo and Kanda distributions. This is why the KDE for Kanda still resembles Tokyo.
-
-Ochanomizu and Yotsuya has stairs on the far end of the platform, with the latter actually beyond the train carriage. The result is an increase in the density of passengers on the left side of the train.
-
-![together](examples/together.png)
-
-This chart shows the same data but in the same plot for easier inter-station comparison. The density on the left (front of train) after Ochanomizu and Yotsuya is immediately observable.
 
 ## Potential extensions
 
